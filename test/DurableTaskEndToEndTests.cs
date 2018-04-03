@@ -308,21 +308,16 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
         }
 
         /// <summary>
-        /// End-to-end test which validates the wait-for-full-batch case using an actor pattern.
+        /// End-to-end test which validates the sequential wait-for-full-batch case using an actor pattern.
         /// </summary>
         [Fact]
-        public async Task BatchedActorOrchestration()
+        public async Task SequentialBatchedActorOrchestration()
         {
-            using (JobHost host = TestHelpers.GetJobHost(this.loggerFactory, nameof(this.BatchedActorOrchestration)))
+            using (JobHost host = TestHelpers.GetJobHost(this.loggerFactory, nameof(this.SequentialBatchedActorOrchestration)))
             {
                 await host.StartAsync();
 
-                var client = await host.StartOrchestratorAsync(nameof(TestOrchestrations.BatchActor), null, this.output);
-
-                // Need to wait for the instance to start before sending events to it.
-                // TODO: This requirement may not be ideal and should be revisited.
-                // BUG: https://github.com/Azure/azure-functions-durable-extension/issues/101
-                await client.WaitForStartupAsync(TimeSpan.FromSeconds(10), this.output);
+                var client = await host.StartOrchestratorAsync(nameof(TestOrchestrations.SequentialBatchActor), null, this.output);
 
                 // Perform some operations
                 await client.RaiseEventAsync("newItem", "item1");
@@ -336,6 +331,39 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
 
                 // Sending this last item will cause the actor to complete itself.
                 await client.RaiseEventAsync("newItem", "item5");
+
+                status = await client.WaitForCompletionAsync(TimeSpan.FromSeconds(10), this.output);
+
+                Assert.Equal(OrchestrationRuntimeStatus.Completed, status?.RuntimeStatus);
+
+                await host.StopAsync();
+            }
+        }
+
+        /// <summary>
+        /// End-to-end test which validates the parallel wait-for-full-batch case using an actor pattern.
+        /// </summary>
+        [Fact]
+        public async Task ParallelBatchedActorOrchestration()
+        {
+            using (JobHost host = TestHelpers.GetJobHost(this.loggerFactory, nameof(this.ParallelBatchedActorOrchestration)))
+            {
+                await host.StartAsync();
+
+                var client = await host.StartOrchestratorAsync(nameof(TestOrchestrations.ParallelBatchActor), null, this.output);
+
+                // Perform some operations
+                await client.RaiseEventAsync("newItem", "item1");
+                await client.RaiseEventAsync("newItem", "item2");
+                await client.RaiseEventAsync("newItem", "item3");
+
+                // Make sure it's still running and didn't complete early (or fail).
+                await Task.Delay(TimeSpan.FromSeconds(2));
+                var status = await client.GetStatusAsync();
+                Assert.Equal(OrchestrationRuntimeStatus.Running, status?.RuntimeStatus);
+
+                // Sending this last item will cause the actor to complete itself.
+                await client.RaiseEventAsync("newItem", "item4");
 
                 status = await client.WaitForCompletionAsync(TimeSpan.FromSeconds(10), this.output);
 

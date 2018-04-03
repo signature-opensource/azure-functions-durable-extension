@@ -81,7 +81,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
             return currentValue;
         }
 
-        public static async Task BatchActor([OrchestrationTrigger] DurableOrchestrationContext ctx)
+        public static async Task SequentialBatchActor([OrchestrationTrigger] DurableOrchestrationContext ctx)
         {
             var requiredItems = new HashSet<string>(new[] { @"item1", @"item2", @"item3", @"item4", @"item5" });
 
@@ -97,6 +97,15 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
             }
 
             // we've received events for all the required items; safe to bail now!
+        }
+
+        public static async Task ParallelBatchActor([OrchestrationTrigger] DurableOrchestrationContext ctx)
+        {
+            Task item1 = ctx.WaitForExternalEvent<string>("newItem");
+            Task item2 = ctx.WaitForExternalEvent<string>("newItem");
+            Task item3 = ctx.WaitForExternalEvent<string>("newItem");
+            Task item4 = ctx.WaitForExternalEvent<string>("newItem");
+            await Task.WhenAll(item1, item2, item3, item4);
         }
 
         public static async Task<string> Approval([OrchestrationTrigger] DurableOrchestrationContext ctx)

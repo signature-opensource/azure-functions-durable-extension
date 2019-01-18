@@ -49,6 +49,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
         private readonly ConcurrentDictionary<FunctionName, ITriggeredFunctionExecutor> registeredActivities =
             new ConcurrentDictionary<FunctionName, ITriggeredFunctionExecutor>();
 
+        private readonly FixedSizeQueue<FunctionName> recentlyDeregisteredFunctions =
+            new FixedSizeQueue<FunctionName>(maxQueueLength: 20);
+
         private readonly AsyncLock taskHubLock = new AsyncLock();
 
         private readonly bool isOptionsConfigured;
@@ -472,6 +475,12 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
                 writeToUserLogs: false);
 
             this.registeredOrchestrators.TryRemove(orchestratorFunction, out _);
+            this.recentlyDeregisteredFunctions.Enqueue(orchestratorFunction);
+        }
+
+        internal bool FunctionRecentlyDeregistered(FunctionName functionName)
+        {
+            return this.recentlyDeregisteredFunctions.Contains(functionName);
         }
 
         internal OrchestratorInfo GetOrchestratorInfo(FunctionName orchestratorFunction)
@@ -511,17 +520,20 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
                 writeToUserLogs: false);
 
             this.registeredActivities.TryRemove(activityFunction, out _);
+            this.recentlyDeregisteredFunctions.Enqueue(activityFunction);
         }
 
         internal void ThrowIfFunctionDoesNotExist(string name, FunctionType functionType)
         {
             var functionName = new FunctionName(name);
 
-            if (functionType == FunctionType.Activity && !this.registeredActivities.ContainsKey(functionName))
+            if (functionType == FunctionType.Activity && !this.registeredActivities.ContainsKey(functionName)
+                && !this.recentlyDeregisteredFunctions.Contains(functionName))
             {
                 throw new ArgumentException(this.GetInvalidActivityFunctionMessage(name));
             }
-            else if (functionType == FunctionType.Orchestrator && !this.registeredOrchestrators.ContainsKey(functionName))
+            else if (functionType == FunctionType.Orchestrator && !this.registeredOrchestrators.ContainsKey(functionName)
+                && !this.recentlyDeregisteredFunctions.Contains(functionName))
             {
                 throw new ArgumentException(this.GetInvalidOrchestratorFunctionMessage(name));
             }
@@ -684,6 +696,58 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
             }
 
             return payload;
+        }
+
+        private class FixedSizeQueue<T>
+        {
+            private ConcurrentQueue<T> internalQ = new ConcurrentQueue<T>();
+            private object lockObject = new object();
+
+            public FixedSizeQueue(int maxQueueLength)
+            {
+                this.Limit = maxQueueLength;
+            }
+
+            /// <summary>
+            /// Gets or sets the maximum number of entries in the queue.
+            /// </summary>
+            public int Limit { get; set; }
+
+            /// <summary>
+            /// Adds an object to the queue.
+            /// </summary>
+            /// <param name="obj">Object to add to the internal queue.</param>
+            public void Enqueue(T obj)
+            {
+                this.internalQ.Enqueue(obj);
+
+                // Remove objects in the queue that exceed the limit
+                lock (this.lockObject)
+                {
+                    T overflow;
+                    while (this.internalQ.Count > this.Limit && this.internalQ.TryDequeue(out overflow))
+                    {
+                    }
+                }
+            }
+
+            /// <summary>
+            /// Linearly searches the queue for the given object.
+            /// </summary>
+            /// <param name="obj">Object to search the queue for.</param>
+            /// <returns>True if internal queue contains this object.</returns>
+            public bool Contains(T obj)
+            {
+                foreach (T element in this.internalQ)
+                {
+                    if (obj.Equals(element))
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
         }
     }
 }

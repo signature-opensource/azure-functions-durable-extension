@@ -1602,6 +1602,11 @@
             Deletes this actor after this operation completes.
             </summary>
         </member>
+        <member name="M:Microsoft.Azure.WebJobs.IDurableActorContext.ScheduleOperation(System.TimeSpan,System.String,System.Object)">
+            <summary>
+            Schedule an operation to execute on this actor at a later time.
+            </summary>
+        </member>
         <member name="T:Microsoft.Azure.WebJobs.IDurableOrchestrationClient">
             <summary>
             Provides functionality available to durable orchestration clients.

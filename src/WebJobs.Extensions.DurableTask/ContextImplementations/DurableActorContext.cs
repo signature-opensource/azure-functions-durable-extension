@@ -118,5 +118,10 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
 
             base.ThrowIfInvalidAccess();
         }
+
+        public void ScheduleOperation(TimeSpan delay, string operationName, object operationContent = null)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

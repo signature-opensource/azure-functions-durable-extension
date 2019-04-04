@@ -86,5 +86,10 @@ namespace Microsoft.Azure.WebJobs
         /// Deletes this actor after this operation completes.
         /// </summary>
         void DestructOnExit();
+
+        /// <summary>
+        /// Schedule an operation to execute on this actor at a later time.
+        /// </summary>
+        void ScheduleOperation(TimeSpan delay, string operationName, object operationContent = null);
     }
 }

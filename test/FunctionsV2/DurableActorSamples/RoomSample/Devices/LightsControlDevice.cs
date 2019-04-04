@@ -9,7 +9,6 @@ namespace RoomSample
 {
     /// <summary>
     /// A device that controls the light switch, and keeps it in sync with the lightsOn room property.
-    /// It also monitors the powerSaveMode room property, turning off the light when entering powerSaveMode.
     /// </summary>
     public class LightsControlDevice : Device
     {

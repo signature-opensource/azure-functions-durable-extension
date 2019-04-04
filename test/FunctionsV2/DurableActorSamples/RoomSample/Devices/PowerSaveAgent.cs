@@ -21,7 +21,6 @@ namespace RoomSample
 
         private DateTime? LastChangeToOccupancy { get; set; }
 
-
         public override Task OnConnected(IDurableActorContext context, JObject roomProperties)
         {
             return this.OnPropertiesUpdated(context, roomProperties, this.RoomActor);

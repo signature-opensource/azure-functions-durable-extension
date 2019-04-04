@@ -32,13 +32,18 @@ namespace RoomSample
                         break;
                     }
 
-                // devices talk to the room using the following protocol
+                // devices connect to the room using the following protocol
                 //
                 //  device ---> room     (connect-device)
                 //  device <--- room     (device-connected)
+                //
+                //  while connected, the room streams updates whenever properties change
+                //
                 //  device <--- room     (properties-updated)
                 //  device <--- room     (properties-updated)
-                //  ...
+                //
+                //  devices disconnect from the room using the following protocol
+                //
                 //  device ---> room     (disconnect-device)
                 //  device <--- room     (device-disconnected)
 

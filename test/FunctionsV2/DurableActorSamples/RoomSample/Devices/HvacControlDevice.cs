@@ -9,7 +9,6 @@ namespace RoomSample
 {
     /// <summary>
     /// A device that controls the heater and AC, based on target temperature vs. actual temperature.
-    /// It also monitors the powerSaveMode room property, tolerating a larger temperature difference.
     /// </summary>
     public class HvacControlDevice : Device
     {

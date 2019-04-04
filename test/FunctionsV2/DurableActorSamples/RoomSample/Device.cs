@@ -23,7 +23,7 @@ namespace RoomSample
         public Guid DeviceId { get; private set; }
 
         /// <summary>
-        /// The room this device is connected to, or null if not connected.
+        /// The room this device is connected to.
         /// </summary>
         public ActorId RoomActor { get; set; }
 
@@ -44,7 +44,7 @@ namespace RoomSample
         }
 
         /// <summary>
-        /// Handle device-specific operations.
+        /// Device-specific operations received by the actor.
         /// </summary>
         public virtual Task OnDeviceSpecificOperation(IDurableActorContext context)
         {

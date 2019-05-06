@@ -8,7 +8,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using DurableTask.Core;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
-using Newtonsoft.Json;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask.Models;
 
 namespace Microsoft.Azure.WebJobs
 {
@@ -29,14 +31,14 @@ namespace Microsoft.Azure.WebJobs
         /// Creates an HTTP response that is useful for checking the status of the specified instance.
         /// </summary>
         /// <remarks>
-        /// The payload of the returned <see cref="HttpResponseMessage"/> contains HTTP API URLs that can
+        /// The payload of the returned <see cref="ActionResult{CheckStatusResponse}"/> contains HTTP API URLs that can
         /// be used to query the status of the orchestration, raise events to the orchestration, or
         /// terminate the orchestration.
         /// </remarks>
         /// <param name="request">The HTTP request that triggered the current orchestration instance.</param>
         /// <param name="instanceId">The ID of the orchestration instance to check.</param>
         /// <returns>An HTTP 202 response with a Location header and a payload containing instance control URLs.</returns>
-        HttpResponseMessage CreateCheckStatusResponse(HttpRequestMessage request, string instanceId);
+        ActionResult<CheckStatusResponse> CreateCheckStatusResponse(HttpRequest request, string instanceId);
 
         /// <summary>
         /// Creates a <see cref="HttpManagementPayload"/> object that contains status, terminate and send external event HTTP endpoints.
@@ -60,8 +62,8 @@ namespace Microsoft.Azure.WebJobs
         /// <param name="timeout">Total allowed timeout for output from the durable function. The default value is 10 seconds.</param>
         /// <param name="retryInterval">The timeout between checks for output from the durable function. The default value is 1 second.</param>
         /// <returns>An HTTP response which may include a 202 and location header or a 200 with the durable function output in the response body.</returns>
-        Task<HttpResponseMessage> WaitForCompletionOrCreateCheckStatusResponseAsync(
-            HttpRequestMessage request,
+        Task<IActionResult> WaitForCompletionOrCreateCheckStatusResponseAsync(
+            HttpRequest request,
             string instanceId,
             TimeSpan timeout,
             TimeSpan retryInterval);

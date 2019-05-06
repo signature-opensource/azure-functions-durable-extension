@@ -16,7 +16,10 @@ using DurableTask.Core.Common;
 using DurableTask.Core.Exceptions;
 using DurableTask.Core.History;
 using DurableTask.Core.Middleware;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs.Description;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask.Models;
 using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Azure.WebJobs.Host.Config;
 using Microsoft.Azure.WebJobs.Host.Executors;
@@ -682,8 +685,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
         }
 
         // Get a response that will point to our webhook handler.
-        internal HttpResponseMessage CreateCheckStatusResponse(
-            HttpRequestMessage request,
+        internal ActionResult<CheckStatusResponse> CreateCheckStatusResponse(
+            HttpRequest request,
             string instanceId,
             OrchestrationClientAttribute attribute)
         {
@@ -701,8 +704,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
 
         // Get a response that will wait for response from the durable function for predefined period of time before
         // pointing to our webhook handler.
-        internal async Task<HttpResponseMessage> WaitForCompletionOrCreateCheckStatusResponseAsync(
-            HttpRequestMessage request,
+        internal async Task<IActionResult> WaitForCompletionOrCreateCheckStatusResponseAsync(
+            HttpRequest request,
             string instanceId,
             OrchestrationClientAttribute attribute,
             TimeSpan timeout,

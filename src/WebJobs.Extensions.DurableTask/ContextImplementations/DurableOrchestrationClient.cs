@@ -10,6 +10,9 @@ using System.Threading.Tasks;
 using DurableTask.AzureStorage;
 using DurableTask.Core;
 using DurableTask.Core.History;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using AzureStorage = DurableTask.AzureStorage;
@@ -51,7 +54,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
         string IDurableOrchestrationClient.TaskHubName => this.hubName;
 
         /// <inheritdoc />
-        HttpResponseMessage IDurableOrchestrationClient.CreateCheckStatusResponse(HttpRequestMessage request, string instanceId)
+        ActionResult<CheckStatusResponse> IDurableOrchestrationClient.CreateCheckStatusResponse(HttpRequest request, string instanceId)
         {
             return this.config.CreateCheckStatusResponse(request, instanceId, this.attribute);
         }
@@ -63,8 +66,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
         }
 
         /// <inheritdoc />
-        async Task<HttpResponseMessage> IDurableOrchestrationClient.WaitForCompletionOrCreateCheckStatusResponseAsync(
-            HttpRequestMessage request,
+        async Task<IActionResult> IDurableOrchestrationClient.WaitForCompletionOrCreateCheckStatusResponseAsync(
+            HttpRequest request,
             string instanceId,
             TimeSpan timeout,
             TimeSpan retryInterval)

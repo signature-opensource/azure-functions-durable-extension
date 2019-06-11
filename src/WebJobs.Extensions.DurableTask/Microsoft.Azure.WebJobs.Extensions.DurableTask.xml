@@ -331,6 +331,18 @@
             The parent instance that called this operation.
             </summary>
         </member>
+        <member name="P:Microsoft.Azure.WebJobs.Extensions.DurableTask.RequestMessage.Timestamp">
+            <summary>
+            A timestamp for this request. 
+            Used for duplicate filtering and in-order delivery.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Azure.WebJobs.Extensions.DurableTask.RequestMessage.Predecessor">
+            <summary>
+            A timestamp for the predecessor request in the stream, or DateTime.MinValue if none.
+            Used for duplicate filtering and in-order delivery.
+            </summary>
+        </member>
         <member name="P:Microsoft.Azure.WebJobs.Extensions.DurableTask.RequestMessage.LockSet">
             <summary>
             For lock requests, the set of locks being acquired. Is sorted,
@@ -2295,6 +2307,19 @@
             The `InnerException` property of this instance will contain additional information
             about the failed sub-orchestrator or activity function.
             </remarks>
+        </member>
+        <member name="M:Microsoft.Azure.WebJobs.FunctionFailedException.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of a <see cref="T:Microsoft.Azure.WebJobs.FunctionFailedException"/>.
+            </summary>
+            <param name="message">A message describing where to look for more details.</param>
+        </member>
+        <member name="M:Microsoft.Azure.WebJobs.FunctionFailedException.#ctor(System.String,System.Exception)">
+            <summary>
+            Initializes a new instance of a <see cref="T:Microsoft.Azure.WebJobs.FunctionFailedException"/>.
+            </summary>
+            <param name="message">A message describing where to look for more details.</param>
+            <param name="innerException">The exception that caused the function to fail.</param>
         </member>
         <member name="T:Microsoft.Azure.WebJobs.FunctionName">
             <summary>

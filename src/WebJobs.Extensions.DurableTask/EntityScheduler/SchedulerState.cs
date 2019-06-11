@@ -42,6 +42,12 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
         [JsonProperty(PropertyName = "lockedBy", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string LockedBy { get; set; }
 
+        /// <summary>
+        /// The instance id of the orchestration that currently holds the lock of this entity.
+        /// </summary>
+        [JsonProperty(PropertyName = "deduplicator", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public Deduplicator Deduplicator { get; set; } = new Deduplicator();
+
         [JsonIgnore]
         public bool IsEmpty => !this.EntityExists && (this.Queue == null || this.Queue.Count == 0) && this.LockedBy == null;
 

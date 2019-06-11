@@ -376,7 +376,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
             }
         }
 
-        internal override void SendEntityMessage(OrchestrationInstance target, string eventName, object eventContent)
+        internal override void SendEntityMessage(OrchestrationInstance target, string eventName, RequestMessage message)
         {
             if (!this.IsReplaying)
             {
@@ -385,10 +385,10 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
                     this.ExecutionId,
                     target.InstanceId,
                     eventName,
-                    eventContent);
+                    message);
             }
 
-            this.InnerContext.SendEvent(target, eventName, eventContent);
+            this.InnerContext.SendEvent(target, eventName, message);
         }
 
         internal override Guid NewGuid()

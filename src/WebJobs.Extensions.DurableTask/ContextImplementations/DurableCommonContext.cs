@@ -403,7 +403,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
             return output;
         }
 
-        internal abstract void SendEntityMessage(OrchestrationInstance target, string eventName, object eventContent);
+        internal abstract void SendEntityMessage(OrchestrationInstance target, string eventName, RequestMessage message);
 
         internal Task<T> WaitForExternalEvent<T>(string name, string reason)
         {

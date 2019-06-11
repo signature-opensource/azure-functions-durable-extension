@@ -148,15 +148,17 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
             }
         }
 
-        internal override void SendEntityMessage(OrchestrationInstance target, string eventName, object eventContent)
+        internal override void SendEntityMessage(OrchestrationInstance target, string eventName, RequestMessage message)
         {
             lock (this.outbox)
             {
+                this.State.Deduplicator.Send(message, target.InstanceId, DateTime.UtcNow);
+
                 this.outbox.Add(new OutgoingMessage()
                 {
                     Target = target,
                     EventName = eventName,
-                    EventContent = eventContent,
+                    EventContent = message,
                 });
             }
         }

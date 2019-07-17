@@ -43,7 +43,10 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
             TimeSpan? maxQueuePollingInterval = null,
             string[] eventGridPublishEventTypes = null,
             string storageProviderType = AzureStorageProviderType,
-            bool autoFetchLargeMessages = true)
+            bool autoFetchLargeMessages = true,
+            int httpAsyncSleepTime = 5000,
+            bool asynchronousPatternEnabled = true,
+            IDurableHttpMessageHandlerFactory durableHttpMessageHandler = null)
         {
             var durableTaskOptions = new DurableTaskOptions
             {
@@ -61,6 +64,11 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
                         TopicEndpoint = eventGridTopicEndpoint,
                         PublishEventTypes = eventGridPublishEventTypes,
                     },
+                },
+                HttpSettings = new HttpOptions()
+                {
+                    DefaultAsyncRequestSleepTime = httpAsyncSleepTime,
+                    AsynchronousPatternEnabled = asynchronousPatternEnabled,
                 },
                 NotificationUrl = notificationUrl,
                 ExtendedSessionsEnabled = enableExtendedSessions,
@@ -113,7 +121,12 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
 
             var optionsWrapper = new OptionsWrapper<DurableTaskOptions>(durableTaskOptions);
             var testNameResolver = new TestNameResolver(nameResolver);
-            return PlatformSpecificHelpers.CreateJobHost(optionsWrapper, loggerProvider, testNameResolver);
+            if (durableHttpMessageHandler == null)
+            {
+                durableHttpMessageHandler = new DurableHttpMessageHandlerFactory();
+            }
+
+            return PlatformSpecificHelpers.CreateJobHost(optionsWrapper, loggerProvider, testNameResolver, durableHttpMessageHandler);
         }
 
         public static string GetTaskHubNameFromTestName(string testName, bool enableExtendedSessions)

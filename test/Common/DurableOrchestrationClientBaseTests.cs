@@ -203,7 +203,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
                 wrappedOptions,
                 new LoggerFactory(),
                 TestHelpers.GetTestNameResolver(),
-                new OrchestrationServiceFactory(wrappedOptions, connectionStringResolver));
+                new OrchestrationServiceFactory(wrappedOptions, connectionStringResolver),
+                new DurableHttpMessageHandlerFactory());
         }
     }
 }

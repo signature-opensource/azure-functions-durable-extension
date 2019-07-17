@@ -3,9 +3,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Net;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
+using Microsoft.Extensions.Primitives;
 
 namespace Microsoft.Azure.WebJobs
 {
@@ -73,5 +76,30 @@ namespace Microsoft.Azure.WebJobs
         /// </remarks>
         /// <param name="customStatusObject">The JSON-serializeable value to use as the orchestrator function's custom status.</param>
         void SetCustomStatus(object customStatusObject);
+
+        /// <summary>
+        /// Makes an HTTP call to the specified uri.
+        /// </summary>
+        /// <param name="method">HttpMethod used for api call.</param>
+        /// <param name="uri">uri used to make the HTTP call.</param>
+        /// <returns>A <see cref="Task{DurableHttpResponse}"/>Result of the HTTP call.</returns>
+        Task<DurableHttpResponse> CallHttpAsync(HttpMethod method, Uri uri);
+
+        /// <summary>
+        /// Makes an HTTP call to the specified uri with authentication information
+        /// to get a token.
+        /// </summary>
+        /// <param name="method">HttpMethod used for api call.</param>
+        /// <param name="uri">uri used to make the HTTP call.</param>
+        /// <param name="tokenSource">information to get a token from a specified service.</param>
+        /// <returns>A <see cref="Task{TResult}"/> Result of the HTTP call.</returns>
+        Task<DurableHttpResponse> CallHttpAsync(HttpMethod method, Uri uri, ITokenSource tokenSource);
+
+        /// <summary>
+        /// Makes an HTTP call using the information in the DurableHttpRequest.
+        /// </summary>
+        /// <param name="req">The DurableHttpRequest used to make the HTTP call.</param>
+        /// <returns>A <see cref="Task{DurableHttpResponse}"/>Result of the HTTP call.</returns>
+        Task<DurableHttpResponse> CallHttpAsync(DurableHttpRequest req);
     }
 }

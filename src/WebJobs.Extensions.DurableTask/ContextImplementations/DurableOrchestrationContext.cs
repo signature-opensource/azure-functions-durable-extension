@@ -5,6 +5,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Text;
@@ -13,6 +15,8 @@ using System.Threading.Tasks;
 using DurableTask.Core;
 using DurableTask.Core.Exceptions;
 using DurableTask.Core.History;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask.Options;
+using Microsoft.Extensions.Primitives;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -171,6 +175,111 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
             }
 
             return this.CallDurableTaskFunctionAsync<TResult>(functionName, FunctionType.Orchestrator, false, instanceId, null, retryOptions, input);
+        }
+
+        Task<DurableHttpResponse> IDurableOrchestrationContext.CallHttpAsync(HttpMethod method, Uri uri)
+        {
+            DurableHttpRequest req = new DurableHttpRequest(method, uri);
+            return ((IDurableOrchestrationContext)this).CallHttpAsync(req);
+        }
+
+        Task<DurableHttpResponse> IDurableOrchestrationContext.CallHttpAsync(HttpMethod method, Uri uri, ITokenSource tokenSource)
+        {
+            DurableHttpRequest req = new DurableHttpRequest(method, uri);
+            req.TokenSource = tokenSource;
+            return ((IDurableOrchestrationContext)this).CallHttpAsync(req);
+        }
+
+        async Task<DurableHttpResponse> IDurableOrchestrationContext.CallHttpAsync(DurableHttpRequest req)
+        {
+            DurableHttpResponse durableHttpResponse = await this.ScheduleDurableHttpActivityFunctionAsync(req);
+
+            HttpStatusCode currStatusCode = durableHttpResponse.StatusCode;
+
+            while (currStatusCode == HttpStatusCode.Accepted && this.Config.Options.HttpSettings.AsynchronousPatternEnabled)
+            {
+                Dictionary<string, StringValues> headersDictionary = new Dictionary<string, StringValues>(durableHttpResponse.Headers);
+                DateTime currUtcTime = this.InnerContext.CurrentUtcDateTime;
+                DateTime fireAt = default(DateTime);
+                if (headersDictionary.ContainsKey("Retry-After"))
+                {
+                    fireAt = this.InnerContext.CurrentUtcDateTime.AddSeconds(int.Parse(headersDictionary["Retry-After"]));
+                }
+                else
+                {
+                    fireAt = this.InnerContext.CurrentUtcDateTime.AddMilliseconds(this.Config.Options.HttpSettings.DefaultAsyncRequestSleepTime);
+                }
+
+                await this.InnerContext.CreateTimer(fireAt, CancellationToken.None);
+
+                DurableHttpRequest durableAsyncHttpRequest = this.CreateNewHttpRequestMessageForAsyncResponse(req);
+                durableAsyncHttpRequest = AddLocationHeaderToAsyncRequest(durableAsyncHttpRequest, durableHttpResponse);
+
+                durableHttpResponse = await this.ScheduleDurableHttpActivityFunctionAsync(durableAsyncHttpRequest);
+
+                currStatusCode = durableHttpResponse.StatusCode;
+            }
+
+            return durableHttpResponse;
+        }
+
+        private async Task<DurableHttpResponse> ScheduleDurableHttpActivityFunctionAsync(DurableHttpRequest req)
+        {
+            string serializedRequest = MessagePayloadDataConverter.HttpConverter.Serialize(req);
+            JToken durableHttpResponseJson = await this.CallDurableTaskFunctionAsync<JToken>(
+                functionName: HttpOptions.HttpTaskActivityReservedName,
+                functionType: FunctionType.Activity,
+                oneWay: false,
+                instanceId: null,
+                operation: null,
+                retryOptions: null,
+                input: serializedRequest);
+
+            JsonSerializer serializer = new JsonSerializer();
+            serializer.Converters.Add(new DurableHttpResponseJsonConverter(typeof(DurableHttpResponse)));
+            DurableHttpResponse durableHttpResponse = durableHttpResponseJson.ToObject<DurableHttpResponse>(serializer);
+            return durableHttpResponse;
+        }
+
+        private static IDictionary<string, StringValues> CreateStringValuesHeaderDictionary(IList<KeyValuePair<string, string>> headers)
+        {
+            IDictionary<string, StringValues> newHeaders = new Dictionary<string, StringValues>();
+            if (headers != null)
+            {
+                foreach (var header in headers)
+                {
+                    if (newHeaders.ContainsKey(header.Key))
+                    {
+                        StringValues values = StringValues.Concat(header.Value, newHeaders[header.Key]);
+                        newHeaders[header.Key] = values;
+                    }
+                    else
+                    {
+                        StringValues stringValues = new StringValues(header.Value);
+                        newHeaders.Add(header.Key, stringValues);
+                    }
+                }
+            }
+
+            return newHeaders;
+        }
+
+        private static DurableHttpRequest AddLocationHeaderToAsyncRequest(DurableHttpRequest durableHttpRequest, DurableHttpResponse durableHttpResponse)
+        {
+            IDictionary<string, StringValues> durableHttpRequestHeaders = durableHttpResponse.Headers;
+            string locationValue = durableHttpRequestHeaders["Location"];
+            durableHttpRequest.Uri = new Uri(locationValue);
+            return durableHttpRequest;
+        }
+
+        private DurableHttpRequest CreateNewHttpRequestMessageForAsyncResponse(DurableHttpRequest durableHttpRequest)
+        {
+            DurableHttpRequest newDurableHttpRequest = new DurableHttpRequest(HttpMethod.Get, durableHttpRequest.Uri);
+            newDurableHttpRequest.Headers = durableHttpRequest.Headers;
+            newDurableHttpRequest.Content = durableHttpRequest.Content;
+            newDurableHttpRequest.TokenSource = durableHttpRequest.TokenSource;
+
+            return newDurableHttpRequest;
         }
 
         /// <inheritdoc />

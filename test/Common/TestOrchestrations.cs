@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Primitives;
 using Newtonsoft.Json;
 
 namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
@@ -397,6 +398,48 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
             var startArgs = ctx.GetInput<StartOrchestrationArgs>();
             var result = await ctx.CallActivityAsync<object>(startArgs.FunctionName, startArgs.Input);
             return result;
+        }
+
+        public static async Task<DurableHttpResponse> CallHttpAsyncOrchestrator([OrchestrationTrigger] IDurableOrchestrationContext ctx)
+        {
+            TestDurableHttpRequest testRequest = ctx.GetInput<TestDurableHttpRequest>();
+            DurableHttpRequest durableHttpRequest = ConvertTestRequestToDurableHttpRequest(testRequest);
+            DurableHttpResponse response = await ctx.CallHttpAsync(durableHttpRequest);
+            return response;
+        }
+
+        public static DurableHttpRequest ConvertTestRequestToDurableHttpRequest(TestDurableHttpRequest testRequest)
+        {
+            DurableHttpRequest durableHttpRequest = new DurableHttpRequest(testRequest.HttpMethod, new Uri("https://www.dummy-url.com"));
+            if (testRequest.Headers != null)
+            {
+                foreach (KeyValuePair<string, string> header in testRequest.Headers)
+                {
+                    StringValues stringValues;
+                    if (durableHttpRequest.Headers.TryGetValue(header.Key, out stringValues))
+                    {
+                        stringValues.Append(header.Value);
+                        durableHttpRequest.Headers[header.Key] = stringValues;
+                    }
+                    else
+                    {
+                        stringValues = new StringValues(header.Value);
+                        durableHttpRequest.Headers[header.Key] = stringValues;
+                    }
+                }
+            }
+
+            if (testRequest.Content != null)
+            {
+                durableHttpRequest.Content = testRequest.Content;
+            }
+
+            if (testRequest.TokenSource != null)
+            {
+                durableHttpRequest.TokenSource = testRequest.TokenSource;
+            }
+
+            return durableHttpRequest;
         }
 
         public static string ProvideParentInstanceId([OrchestrationTrigger] IDurableOrchestrationContext ctx)

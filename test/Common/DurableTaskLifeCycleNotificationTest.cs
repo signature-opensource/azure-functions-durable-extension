@@ -1236,7 +1236,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
                 wrappedOptions,
                 new LoggerFactory(),
                 mockNameResolver.Object,
-                new OrchestrationServiceFactory(wrappedOptions, connectionStringResolver));
+                new OrchestrationServiceFactory(wrappedOptions, connectionStringResolver),
+                new DurableHttpMessageHandlerFactory());
 
             var eventGridLifeCycleNotification = (EventGridLifeCycleNotificationHelper)extension.LifeCycleNotificationHelper;
 
@@ -1272,7 +1273,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
                 wrappedOptions,
                 new LoggerFactory(),
                 new SimpleNameResolver(),
-                new OrchestrationServiceFactory(wrappedOptions, connectionStringResolver));
+                new OrchestrationServiceFactory(wrappedOptions, connectionStringResolver),
+                new DurableHttpMessageHandlerFactory());
 
             var lifeCycleNotificationHelper = extension.LifeCycleNotificationHelper;
 
@@ -1299,7 +1301,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
                 wrappedOptions,
                 new LoggerFactory(),
                 new SimpleNameResolver(),
-                new OrchestrationServiceFactory(wrappedOptions, new TestConnectionStringResolver()));
+                new OrchestrationServiceFactory(wrappedOptions, new TestConnectionStringResolver()),
+                new DurableHttpMessageHandlerFactory());
 
             var lifeCycleNotificationHelper = extension.LifeCycleNotificationHelper;
 
@@ -1334,7 +1337,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
                 wrappedOptions,
                 new LoggerFactory(),
                 new SimpleNameResolver(),
-                new OrchestrationServiceFactory(wrappedOptions, new TestConnectionStringResolver()));
+                new OrchestrationServiceFactory(wrappedOptions, new TestConnectionStringResolver()),
+                new DurableHttpMessageHandlerFactory());
 
             var lifeCycleNotificationHelper = extension.LifeCycleNotificationHelper;
 

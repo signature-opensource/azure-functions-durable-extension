@@ -80,7 +80,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
         public async Task DurableHttpAsync_SynchronousAPI_Returns200(string storageProvider)
         {
             HttpResponseMessage testHttpResponseMessage = CreateTestHttpResponseMessage(HttpStatusCode.OK);
-            HttpMessageHandler httpMessageHandler = CreateSynchronousHttpMessageHandler(testHttpResponseMessage);
+            HttpMessageHandler httpMessageHandler = MockSynchronousHttpMessageHandler(testHttpResponseMessage);
 
             using (JobHost host = TestHelpers.GetJobHost(
                 this.loggerProvider,
@@ -102,7 +102,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
                 var status = await client.WaitForCompletionAsync(this.output, timeout: TimeSpan.FromSeconds(400));
 
                 var output = status?.Output;
-                DurableHttpResponse response = output.ToObject<DurableHttpResponse>();
+                JsonSerializer serializer = new JsonSerializer();
+                serializer.Converters.Add(new DurableHttpResponseJsonConverter(typeof(DurableHttpResponse)));
+                DurableHttpResponse response = output.ToObject<DurableHttpResponse>(serializer);
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
                 await host.StopAsync();
@@ -117,7 +119,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
         [MemberData(nameof(TestDataGenerator.GetFullFeaturedStorageProviderOptions), MemberType = typeof(TestDataGenerator))]
         public async Task DurableHttpAsync_CheckUserAgentHeader(string storageProvider)
         {
-            HttpMessageHandler httpMessageHandler = CreateHttpMessageHandlerCheckUserAgent();
+            HttpMessageHandler httpMessageHandler = MockHttpMessageHandlerCheckUserAgent();
 
             using (JobHost host = TestHelpers.GetJobHost(
                 this.loggerProvider,
@@ -139,7 +141,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
                 var status = await client.WaitForCompletionAsync(this.output, timeout: TimeSpan.FromSeconds(400));
 
                 var output = status?.Output;
-                DurableHttpResponse response = output.ToObject<DurableHttpResponse>();
+                JsonSerializer serializer = new JsonSerializer();
+                serializer.Converters.Add(new DurableHttpResponseJsonConverter(typeof(DurableHttpResponse)));
+                DurableHttpResponse response = output.ToObject<DurableHttpResponse>(serializer);
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
                 await host.StopAsync();
@@ -156,15 +160,14 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
         public async Task DurableHttpAsync_AsynchronousPatternDisabled(string storageProvider)
         {
             HttpResponseMessage testHttpResponseMessage = CreateTestHttpResponseMessage(HttpStatusCode.Accepted);
-            HttpMessageHandler httpMessageHandler = CreateSynchronousHttpMessageHandler(testHttpResponseMessage);
+            HttpMessageHandler httpMessageHandler = MockSynchronousHttpMessageHandler(testHttpResponseMessage);
 
             using (JobHost host = TestHelpers.GetJobHost(
                 this.loggerProvider,
                 nameof(this.DurableHttpAsync_AsynchronousPatternDisabled),
                 enableExtendedSessions: false,
                 storageProviderType: storageProvider,
-                durableHttpMessageHandler: new DurableHttpMessageHandlerFactory(httpMessageHandler),
-                asynchronousPatternEnabled: false))
+                durableHttpMessageHandler: new DurableHttpMessageHandlerFactory(httpMessageHandler)))
             {
                 await host.StartAsync();
 
@@ -173,13 +176,16 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
                 TestDurableHttpRequest testRequest = new TestDurableHttpRequest(
                     httpMethod: HttpMethod.Get,
                     headers: headers);
+                testRequest.AsynchronousPatternEnabled = false;
 
                 string functionName = nameof(TestOrchestrations.CallHttpAsyncOrchestrator);
                 var client = await host.StartOrchestratorAsync(functionName, testRequest, this.output);
                 var status = await client.WaitForCompletionAsync(this.output, timeout: TimeSpan.FromSeconds(400));
 
                 var output = status?.Output;
-                DurableHttpResponse response = output.ToObject<DurableHttpResponse>();
+                JsonSerializer serializer = new JsonSerializer();
+                serializer.Converters.Add(new DurableHttpResponseJsonConverter(typeof(DurableHttpResponse)));
+                DurableHttpResponse response = output.ToObject<DurableHttpResponse>(serializer);
                 Assert.Equal(HttpStatusCode.Accepted, response.StatusCode);
 
                 await host.StopAsync();
@@ -195,7 +201,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
         public async Task DurableHttpAsync_SynchronousAPI_ReturnsNotFound(string storageProvider)
         {
             HttpResponseMessage testHttpResponseMessage = CreateTestHttpResponseMessage(HttpStatusCode.NotFound);
-            HttpMessageHandler httpMessageHandler = CreateSynchronousHttpMessageHandler(testHttpResponseMessage);
+            HttpMessageHandler httpMessageHandler = MockSynchronousHttpMessageHandler(testHttpResponseMessage);
 
             using (JobHost host = TestHelpers.GetJobHost(
                 this.loggerProvider,
@@ -244,7 +250,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
                                                                                         headers: testHeaders,
                                                                                         content: "test content");
 
-            HttpMessageHandler httpMessageHandler = CreateSynchronousHttpMessageHandler(testHttpResponseMessage);
+            HttpMessageHandler httpMessageHandler = MockSynchronousHttpMessageHandler(testHttpResponseMessage);
 
             using (JobHost host = TestHelpers.GetJobHost(
                 this.loggerProvider,
@@ -317,7 +323,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
                                                                                         headers: testHeaders,
                                                                                         content: "test content");
 
-            HttpMessageHandler httpMessageHandler = CreateSynchronousHttpMessageHandler(testHttpResponseMessage);
+            HttpMessageHandler httpMessageHandler = MockSynchronousHttpMessageHandler(testHttpResponseMessage);
 
             using (JobHost host = TestHelpers.GetJobHost(
                 this.loggerProvider,
@@ -345,11 +351,27 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
                 DurableHttpResponse response = output.ToObject<DurableHttpResponse>(serializer);
 
                 var hostHeaders = response.Headers["Host"];
-                bool hasHostValueOne = response.Headers["Host"].Contains("test.host.com");
-                bool hasHostValueTwo = response.Headers["Host"].Contains("test.response.com");
+                bool hasHostValueOne = hostHeaders.Contains("test.host.com");
+                bool hasHostValueTwo = hostHeaders.Contains("test.response.com");
+
+                var cacheHeaders = response.Headers["Cache-Control"].First();
+                bool hasCacheValueOne = cacheHeaders.Contains("GET");
+                bool hasCacheValueTwo = cacheHeaders.Contains("POST");
+                bool hasCacheValueThree = cacheHeaders.Contains("HEAD");
+                bool hasCacheValueFour = cacheHeaders.Contains("OPTIONS");
+
+                var accessHeaders = response.Headers["Access-Control-Expose-Headers"];
+                bool hasAccessValueOne = accessHeaders.Contains("X-customHeader1");
+                bool hasAccessValueTwo = accessHeaders.Contains("X-customHeader2");
+                bool hasAccessValueThree = accessHeaders.Contains("X-customHeader3");
+                bool hasAccessValueFour = accessHeaders.Contains("X-customHeader4");
+                bool hasAccessValueFive = accessHeaders.Contains("X-customHeader5");
 
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 Assert.True(hasHostValueOne && hasHostValueTwo);
+                Assert.True(hasCacheValueOne && hasCacheValueTwo && hasCacheValueThree && hasCacheValueFour);
+                Assert.True(hasAccessValueOne && hasAccessValueTwo && hasAccessValueThree && hasAccessValueFour && hasAccessValueFive);
+
                 Assert.Contains("test content", response.Content);
 
                 await host.StopAsync();
@@ -376,7 +398,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
                                                                                         headers: testHeaders,
                                                                                         content: "test content");
 
-            HttpMessageHandler httpMessageHandler = CreateSynchronousHttpMessageHandler(testHttpResponseMessage);
+            HttpMessageHandler httpMessageHandler = MockSynchronousHttpMessageHandler(testHttpResponseMessage);
 
             using (JobHost host = TestHelpers.GetJobHost(
                 this.loggerProvider,
@@ -435,7 +457,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
             HttpResponseMessage acceptedHttpResponseMessage = CreateTestHttpResponseMessage(
                                                                                         statusCode: HttpStatusCode.Accepted,
                                                                                         headers: testHeaders);
-            HttpMessageHandler httpMessageHandler = CreateAsynchronousHttpMessageHandlerWithRetryAfter(acceptedHttpResponseMessage);
+            HttpMessageHandler httpMessageHandler = MockAsynchronousHttpMessageHandlerWithRetryAfter(acceptedHttpResponseMessage);
 
             using (JobHost host = TestHelpers.GetJobHost(
                 this.loggerProvider,
@@ -457,7 +479,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
                 var status = await client.WaitForCompletionAsync(this.output, timeout: TimeSpan.FromSeconds(240));
 
                 var output = status?.Output;
-                DurableHttpResponse response = output.ToObject<DurableHttpResponse>();
+                JsonSerializer serializer = new JsonSerializer();
+                serializer.Converters.Add(new DurableHttpResponseJsonConverter(typeof(DurableHttpResponse)));
+                DurableHttpResponse response = output.ToObject<DurableHttpResponse>(serializer);
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
                 await host.StopAsync();
@@ -480,7 +504,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
                                                                                                statusCode: HttpStatusCode.Accepted,
                                                                                                headers: asyncTestHeaders);
 
-            HttpMessageHandler httpMessageHandler = CreateAsynchronousHttpMessageHandler(acceptedHttpResponseMessage);
+            HttpMessageHandler httpMessageHandler = MockAsynchronousHttpMessageHandler(acceptedHttpResponseMessage);
 
             using (JobHost host = TestHelpers.GetJobHost(
                 this.loggerProvider,
@@ -502,7 +526,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
                 var status = await client.WaitForCompletionAsync(this.output, timeout: TimeSpan.FromSeconds(Debugger.IsAttached ? 3000 : 90));
 
                 var output = status?.Output;
-                DurableHttpResponse response = output.ToObject<DurableHttpResponse>();
+                JsonSerializer serializer = new JsonSerializer();
+                serializer.Converters.Add(new DurableHttpResponseJsonConverter(typeof(DurableHttpResponse)));
+                DurableHttpResponse response = output.ToObject<DurableHttpResponse>(serializer);
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
                 await host.StopAsync();
@@ -524,7 +550,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
             HttpResponseMessage acceptedHttpResponseMessage = CreateTestHttpResponseMessage(
                                                                                                statusCode: HttpStatusCode.Accepted,
                                                                                                headers: asyncTestHeaders);
-            HttpMessageHandler httpMessageHandler = CreateAsynchronousHttpMessageHandlerLongRunning(acceptedHttpResponseMessage);
+            HttpMessageHandler httpMessageHandler = MockAsynchronousHttpMessageHandlerLongRunning(acceptedHttpResponseMessage);
 
             using (JobHost host = TestHelpers.GetJobHost(
                 this.loggerProvider,
@@ -563,16 +589,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
         [MemberData(nameof(TestDataGenerator.GetFullFeaturedStorageProviderOptions), MemberType = typeof(TestDataGenerator))]
         public async Task DurableHttpAsync_AsynchronousAPI_MultipleAsyncCalls(string storageProvider)
         {
-            // HttpMessageHandler httpMessageHandler = CreateAsynchronousHttpMessageHandlerForMultipleRequests();
-
-            Dictionary<string, string> asyncTestHeaders = new Dictionary<string, string>();
-            asyncTestHeaders.Add("Location", "https://www.dummy-location-url.com");
-
-            HttpResponseMessage acceptedHttpResponseMessage = CreateTestHttpResponseMessage(
-                                                                                               statusCode: HttpStatusCode.Accepted,
-                                                                                               headers: asyncTestHeaders);
-
-            HttpMessageHandler httpMessageHandler = CreateAsynchronousHttpMessageHandler(acceptedHttpResponseMessage);
+            HttpMessageHandler httpMessageHandler = MockAsynchronousHttpMessageHandlerForMultipleRequestsTwo();
 
             using (JobHost host = TestHelpers.GetJobHost(
                 this.loggerProvider,
@@ -588,6 +605,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
                 headersOne.Add("Accept", "application/json");
                 TestDurableHttpRequest testRequestOne = new TestDurableHttpRequest(
                     httpMethod: HttpMethod.Get,
+                    uri: "https://www.dummy-url.com/AsyncRequestOne",
                     headers: headersOne);
 
                 string functionNameOne = nameof(TestOrchestrations.CallHttpAsyncOrchestrator);
@@ -603,18 +621,74 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
                 headersTwo.Add("Accept", "application/json");
                 TestDurableHttpRequest testRequestTwo = new TestDurableHttpRequest(
                     httpMethod: HttpMethod.Get,
+                    uri: "https://www.dummy-url.com/AsyncRequestTwo",
                     headers: headersTwo);
 
                 string functionName = nameof(TestOrchestrations.CallHttpAsyncOrchestrator);
                 var clientTwo = await host.StartOrchestratorAsync(functionName, testRequestTwo, this.output);
                 var statusTwo = await clientTwo.WaitForCompletionAsync(this.output, timeout: TimeSpan.FromSeconds(Debugger.IsAttached ? 3000 : 90));
-                var outputTwo = statusOne?.Output;
-                DurableHttpResponse responseTwo = outputOne.ToObject<DurableHttpResponse>();
+                var outputTwo = statusTwo?.Output;
+                DurableHttpResponse responseTwo = outputTwo.ToObject<DurableHttpResponse>();
 
                 Assert.Equal(HttpStatusCode.OK, responseTwo.StatusCode);
 
                 await host.StopAsync();
             }
+        }
+
+        private static HttpMessageHandler MockAsynchronousHttpMessageHandlerForMultipleRequestsTwo()
+        {
+            Dictionary<string, string> asyncTestHeadersOne = new Dictionary<string, string>();
+            asyncTestHeadersOne.Add("Location", "https://www.dummy-location-url.com/AsyncRequestOne");
+
+            Dictionary<string, string> asyncTestHeadersTwo = new Dictionary<string, string>();
+            asyncTestHeadersTwo.Add("Location", "https://www.dummy-location-url.com/AsyncRequestTwo");
+
+            HttpResponseMessage acceptedHttpResponseMessageOne = CreateTestHttpResponseMessage(
+                                                                                              statusCode: HttpStatusCode.Accepted,
+                                                                                              headers: asyncTestHeadersOne);
+            HttpResponseMessage acceptedHttpResponseMessageTwo = CreateTestHttpResponseMessage(
+                                                                                             statusCode: HttpStatusCode.Accepted,
+                                                                                             headers: asyncTestHeadersTwo);
+            HttpResponseMessage okHttpResponseMessage = CreateTestHttpResponseMessage(HttpStatusCode.OK);
+            HttpResponseMessage forbiddenResponseMessage = CreateTestHttpResponseMessage(HttpStatusCode.Forbidden);
+
+            var handlerMock = new Mock<HttpMessageHandler>(MockBehavior.Strict);
+            handlerMock
+               .Protected()
+               .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.Is<HttpRequestMessage>(req => UriContainsGivenString(req, "AsyncRequestOne")), ItExpr.IsAny<CancellationToken>())
+               .ReturnsAsync(new Queue<HttpResponseMessage>(new[]
+                {
+                    acceptedHttpResponseMessageOne,
+                    acceptedHttpResponseMessageOne,
+                    acceptedHttpResponseMessageOne,
+                    acceptedHttpResponseMessageOne,
+                    okHttpResponseMessage,
+                }).Dequeue);
+
+            handlerMock
+               .Protected()
+               .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.Is<HttpRequestMessage>(req => UriContainsGivenString(req, "AsyncRequestTwo")), ItExpr.IsAny<CancellationToken>())
+               .ReturnsAsync(new Queue<HttpResponseMessage>(new[]
+               {
+                    acceptedHttpResponseMessageTwo,
+                    acceptedHttpResponseMessageTwo,
+                    acceptedHttpResponseMessageTwo,
+                    acceptedHttpResponseMessageTwo,
+                    okHttpResponseMessage,
+               }).Dequeue);
+
+            handlerMock
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.Is<HttpRequestMessage>(req => !UriContainsGivenString(req, "AsyncRequestOne") && !UriContainsGivenString(req, "AsyncRequestTwo")), ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(forbiddenResponseMessage);
+
+            return handlerMock.Object;
+        }
+
+        private static bool UriContainsGivenString(HttpRequestMessage req, string uriEnd)
+        {
+            return req.RequestUri.ToString().EndsWith(uriEnd);
         }
 
         /// <summary>
@@ -626,7 +700,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
         [MemberData(nameof(TestDataGenerator.GetFullFeaturedStorageProviderOptions), MemberType = typeof(TestDataGenerator))]
         public async Task DurableHttpAsync_Synchronous_AddsBearerToken(string storageProvider)
         {
-            HttpMessageHandler httpMessageHandler = CreateSynchronousHttpMessageHandlerForTestingTokenSource();
+            HttpMessageHandler httpMessageHandler = MockSynchronousHttpMessageHandlerForTestingTokenSource();
 
             using (JobHost host = TestHelpers.GetJobHost(
                 this.loggerProvider,
@@ -649,7 +723,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
                 var client = await host.StartOrchestratorAsync(nameof(TestOrchestrations.CallHttpAsyncOrchestrator), testRequest, this.output);
                 var status = await client.WaitForCompletionAsync(this.output, timeout: TimeSpan.FromSeconds(Debugger.IsAttached ? 3000 : 90));
                 var output = status?.Output;
-                DurableHttpResponse response = output.ToObject<DurableHttpResponse>();
+                JsonSerializer serializer = new JsonSerializer();
+                serializer.Converters.Add(new DurableHttpResponseJsonConverter(typeof(DurableHttpResponse)));
+                DurableHttpResponse response = output.ToObject<DurableHttpResponse>(serializer);
 
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
@@ -657,7 +733,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
             }
         }
 
-        private static HttpMessageHandler CreateSynchronousHttpMessageHandlerForTestingTokenSource()
+        private static HttpMessageHandler MockSynchronousHttpMessageHandlerForTestingTokenSource()
         {
             HttpResponseMessage okHttpResponseMessage = CreateTestHttpResponseMessage(HttpStatusCode.OK);
             HttpResponseMessage forbiddenHttpResponseMessage = CreateTestHttpResponseMessage(HttpStatusCode.Forbidden);
@@ -692,7 +768,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
         [MemberData(nameof(TestDataGenerator.GetFullFeaturedStorageProviderOptions), MemberType = typeof(TestDataGenerator))]
         public async Task DurableHttpAsync_Asynchronous_AddsBearerToken(string storageProvider)
         {
-            HttpMessageHandler httpMessageHandler = CreateAsynchronousHttpMessageHandlerForTestingTokenSource();
+            HttpMessageHandler httpMessageHandler = MockAsynchronousHttpMessageHandlerForTestingTokenSource();
 
             using (JobHost host = TestHelpers.GetJobHost(
                 this.loggerProvider,
@@ -715,6 +791,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
                 var client = await host.StartOrchestratorAsync(nameof(TestOrchestrations.CallHttpAsyncOrchestrator), testRequest, this.output);
                 var status = await client.WaitForCompletionAsync(this.output, timeout: TimeSpan.FromSeconds(Debugger.IsAttached ? 3000 : 90));
                 var output = status?.Output;
+
                 DurableHttpResponse response = output.ToObject<DurableHttpResponse>();
 
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -723,7 +800,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
             }
         }
 
-        private static HttpMessageHandler CreateAsynchronousHttpMessageHandlerForTestingTokenSource()
+        private static HttpMessageHandler MockAsynchronousHttpMessageHandlerForTestingTokenSource()
         {
             Dictionary<string, string> asyncTestHeaders = new Dictionary<string, string>();
             asyncTestHeaders.Add("Location", "https://www.dummy-location-url.com");
@@ -808,7 +885,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
             return handlerMock.Object;
         }
 
-        private static HttpMessageHandler CreateSynchronousHttpMessageHandler(HttpResponseMessage httpResponseMessage)
+        private static HttpMessageHandler MockSynchronousHttpMessageHandler(HttpResponseMessage httpResponseMessage)
         {
             var handlerMock = new Mock<HttpMessageHandler>(MockBehavior.Strict);
             handlerMock
@@ -819,7 +896,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
             return handlerMock.Object;
         }
 
-        private static HttpMessageHandler CreateHttpMessageHandlerCheckUserAgent()
+        private static HttpMessageHandler MockHttpMessageHandlerCheckUserAgent()
         {
             HttpResponseMessage okHttpResponseMessage = CreateTestHttpResponseMessage(HttpStatusCode.OK);
             HttpResponseMessage forbiddenHttpResponseMessage = CreateTestHttpResponseMessage(HttpStatusCode.Forbidden);
@@ -838,7 +915,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
             return handlerMock.Object;
         }
 
-        private static HttpMessageHandler CreateAsynchronousHttpMessageHandler(HttpResponseMessage acceptedHttpResponseMessage)
+        private static HttpMessageHandler MockAsynchronousHttpMessageHandler(HttpResponseMessage acceptedHttpResponseMessage)
         {
             HttpResponseMessage okHttpResponseMessage = CreateTestHttpResponseMessage(HttpStatusCode.OK);
 
@@ -858,7 +935,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
             return handlerMock.Object;
         }
 
-        private static HttpMessageHandler CreateAsynchronousHttpMessageHandlerLongRunning(HttpResponseMessage acceptedHttpResponseMessage)
+        private static HttpMessageHandler MockAsynchronousHttpMessageHandlerLongRunning(HttpResponseMessage acceptedHttpResponseMessage)
         {
             HttpResponseMessage okHttpResponseMessage = CreateTestHttpResponseMessage(HttpStatusCode.OK);
 
@@ -878,7 +955,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
             return handlerMock.Object;
         }
 
-        private static HttpMessageHandler CreateAsynchronousHttpMessageHandlerWithRetryAfter(HttpResponseMessage acceptedHttpResponseMessage)
+        private static HttpMessageHandler MockAsynchronousHttpMessageHandlerWithRetryAfter(HttpResponseMessage acceptedHttpResponseMessage)
         {
             HttpResponseMessage okHttpResponseMessage = CreateTestHttpResponseMessage(HttpStatusCode.OK);
 

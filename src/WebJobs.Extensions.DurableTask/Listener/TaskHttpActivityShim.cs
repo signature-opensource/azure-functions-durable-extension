@@ -17,13 +17,15 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Listener
     {
         private readonly HttpClient httpClient;
         private readonly DurableTaskExtension config;
+        private readonly JsonSerializerSettings serializerSettings;
 
         public TaskHttpActivityShim(
             DurableTaskExtension config,
             HttpClient httpClientFactory)
         {
             this.config = config ?? throw new ArgumentNullException(nameof(config));
-            this.httpClient = httpClientFactory;
+            this.httpClient = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
+            this.serializerSettings = new JsonSerializerSettings();
         }
 
         public override string Run(TaskContext context, string input)
@@ -34,12 +36,11 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Listener
 
         public async override Task<string> RunAsync(TaskContext context, string rawInput)
         {
-            HttpRequestMessage requestMessage = await CreateHttpRequestMessageAsync(rawInput);
+            HttpRequestMessage requestMessage = await this.ReconstructHttpRequestMessage(rawInput);
             HttpResponseMessage response = await this.httpClient.SendAsync(requestMessage);
-            DurableHttpResponse durableHttpResponse = await CreateDurableHttpResponseAsync(response);
+            DurableHttpResponse durableHttpResponse = await DurableHttpResponse.CreateDurableHttpResponseWithHttpResponseMessage(response);
 
-            string serializedOutput = MessagePayloadDataConverter.HttpConverter.Serialize(durableHttpResponse, true);
-            return serializedOutput;
+            return MessagePayloadDataConverter.HttpConverter.Serialize(value: durableHttpResponse, formatted: true);
         }
 
         private static async Task<DurableHttpResponse> CreateDurableHttpResponseAsync(HttpResponseMessage response)
@@ -50,42 +51,30 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Listener
             return durableHttpResponse;
         }
 
-        private static IDictionary<string, StringValues> CreateStringValuesHeaderDictionary(IEnumerable<KeyValuePair<string, IEnumerable<string>>> headers)
+        internal static IDictionary<string, StringValues> CreateStringValuesHeaderDictionary(IEnumerable<KeyValuePair<string, IEnumerable<string>>> headers)
         {
             IDictionary<string, StringValues> newHeaders = new Dictionary<string, StringValues>();
             if (headers != null)
             {
                 foreach (var header in headers)
                 {
-                    foreach (var headerValue in header.Value)
-                    {
-                        if (newHeaders.ContainsKey(header.Key))
-                        {
-                            StringValues values = StringValues.Concat(headerValue, newHeaders[header.Key]);
-                            newHeaders[header.Key] = values;
-                        }
-                        else
-                        {
-                            StringValues stringValues = new StringValues(headerValue);
-                            newHeaders.Add(header.Key, stringValues);
-                        }
-                    }
+                    newHeaders[header.Key] = new StringValues(header.Value.ToArray());
                 }
             }
 
             return newHeaders;
         }
 
-        private static async Task<HttpRequestMessage> CreateHttpRequestMessageAsync(string rawInput)
+        private async Task<HttpRequestMessage> ReconstructHttpRequestMessage(string serializedRequest)
         {
-            JsonSerializerSettings serializerSettings = new JsonSerializerSettings();
-            serializerSettings.TypeNameHandling = TypeNameHandling.Auto;
+            this.serializerSettings.TypeNameHandling = TypeNameHandling.Auto;
 
-            IList<string> input = JsonConvert.DeserializeObject<List<string>>(rawInput, serializerSettings);
+            // DeserializeObject deserializes into a List and then the first element
+            // of that list is the serialized DurableHttpRequest
+            IList<string> input = JsonConvert.DeserializeObject<List<string>>(serializedRequest, this.serializerSettings);
             string durableHttpRequestString = input.First();
-            DurableHttpRequest durableHttpRequest = JsonConvert.DeserializeObject<DurableHttpRequest>(durableHttpRequestString, serializerSettings);
+            DurableHttpRequest durableHttpRequest = JsonConvert.DeserializeObject<DurableHttpRequest>(durableHttpRequestString, this.serializerSettings);
 
-            // Creating HttpRequestMessage
             HttpRequestMessage requestMessage = new HttpRequestMessage(durableHttpRequest.Method, durableHttpRequest.Uri);
             if (durableHttpRequest.Headers != null)
             {

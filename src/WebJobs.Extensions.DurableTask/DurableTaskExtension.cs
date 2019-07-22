@@ -320,8 +320,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
         /// <returns>An activity shim that delegates execution to an activity function.</returns>
         TaskActivity INameVersionObjectManager<TaskActivity>.GetObject(string name, string version)
         {
-            // checking if the user needs to create a TaskHttpActivityShim
-            if (name == HttpOptions.HttpTaskActivityReservedName)
+            if (IsDurableHttpTask(name))
             {
                 return new TaskHttpActivityShim(this, this.durableHttpClient);
             }
@@ -764,12 +763,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
 
         private static bool IsDurableHttpTask(string functionName)
         {
-            if (functionName == HttpOptions.HttpTaskActivityReservedName)
-            {
-                return true;
-            }
-
-            return false;
+            return string.Equals(functionName, HttpOptions.HttpTaskActivityReservedName);
         }
 
         internal string GetInvalidActivityFunctionMessage(string name)

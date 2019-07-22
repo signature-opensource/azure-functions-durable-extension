@@ -82,18 +82,9 @@ namespace Microsoft.Azure.WebJobs
         /// </summary>
         /// <param name="method">HttpMethod used for api call.</param>
         /// <param name="uri">uri used to make the HTTP call.</param>
+        /// <param name="content">Content passed in the HTTP request.</param>
         /// <returns>A <see cref="Task{DurableHttpResponse}"/>Result of the HTTP call.</returns>
-        Task<DurableHttpResponse> CallHttpAsync(HttpMethod method, Uri uri);
-
-        /// <summary>
-        /// Makes an HTTP call to the specified uri with authentication information
-        /// to get a token.
-        /// </summary>
-        /// <param name="method">HttpMethod used for api call.</param>
-        /// <param name="uri">uri used to make the HTTP call.</param>
-        /// <param name="tokenSource">information to get a token from a specified service.</param>
-        /// <returns>A <see cref="Task{TResult}"/> Result of the HTTP call.</returns>
-        Task<DurableHttpResponse> CallHttpAsync(HttpMethod method, Uri uri, ITokenSource tokenSource);
+        Task<DurableHttpResponse> CallHttpAsync(HttpMethod method, Uri uri, string content = null);
 
         /// <summary>
         /// Makes an HTTP call using the information in the DurableHttpRequest.

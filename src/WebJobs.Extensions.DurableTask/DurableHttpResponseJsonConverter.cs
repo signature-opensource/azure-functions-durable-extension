@@ -12,6 +12,11 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
 {
+    /// <summary>
+    /// This custom JsonConverter is used to deserialize DurableHttpResponse
+    /// messages and keep the Header's StringValues. StringValues otherwise cannot
+    /// be deserialized without losing their values.
+    /// </summary>
     internal class DurableHttpResponseJsonConverter : JsonConverter
     {
         private readonly Type[] types;
@@ -28,33 +33,13 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
 
         public override bool CanConvert(Type objectType)
         {
-            bool value = this.types.Any(t => t == objectType);
-            return value;
+            return this.types.Any(t => t == objectType);
         }
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
             var jObject = JObject.Load(reader);
-
-            int codeInt = int.Parse(jObject["StatusCode"].Value<string>());
-            HttpStatusCode statusCode = (HttpStatusCode)codeInt;
-            DurableHttpResponse durableHttpResponse = new DurableHttpResponse(statusCode);
-
-            Dictionary<string, StringValues> headerDictStringValues = new Dictionary<string, StringValues>();
-            Dictionary<string, IEnumerable<string>> headersDictEnumerable = jObject["Headers"].ToObject<Dictionary<string, IEnumerable<string>>>();
-            foreach (var header in headersDictEnumerable)
-            {
-                string key = header.Key;
-                string[] headerValues = header.Value.ToArray<string>();
-                StringValues values = new StringValues(headerValues);
-                headerDictStringValues.Add(key, values);
-            }
-
-            durableHttpResponse.Headers = headerDictStringValues;
-
-            durableHttpResponse.Content = jObject["Content"].Value<string>();
-
-            return durableHttpResponse;
+            return new DurableHttpResponse(jObject);
         }
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)

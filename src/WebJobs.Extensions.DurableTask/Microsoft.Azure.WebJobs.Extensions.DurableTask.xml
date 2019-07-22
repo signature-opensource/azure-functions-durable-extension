@@ -245,6 +245,12 @@
             Information needed to get a token for a specified service.
             </summary>
         </member>
+        <member name="P:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableHttpRequest.AsynchronousPatternEnabled">
+            <summary>
+            Specifies whether the Durable HTTP APIs should automatically
+            handle the asynchronous HTTP pattern.
+            </summary>
+        </member>
         <member name="T:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableHttpResponse">
             <summary>
             Response received from the HTTP request made by the Durable Function.
@@ -255,6 +261,12 @@
             Initializes a new instance of the <see cref="T:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableHttpResponse"/> class.
             </summary>
             <param name="statusCode">HTTP Status code returned from the HTTP call.</param>
+        </member>
+        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableHttpResponse.#ctor(Newtonsoft.Json.Linq.JObject)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableHttpResponse"/> class.
+            </summary>
+            <param name="jObject">JObject containing information from HttpResponseMessage.</param>
         </member>
         <member name="P:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableHttpResponse.StatusCode">
             <summary>
@@ -269,6 +281,20 @@
         <member name="P:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableHttpResponse.Content">
             <summary>
             Content returned from an HTTP request.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableHttpResponse.CreateDurableHttpResponseWithHttpResponseMessage(System.Net.Http.HttpResponseMessage)">
+            <summary>
+            Creates a DurableHttpResponse from an HttpResponseMessage.
+            </summary>
+            <param name="httpResponseMessage">HttpResponseMessage returned from the HTTP call.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task`1"/> representing the result of the asynchronous operation.</returns>
+        </member>
+        <member name="T:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableHttpResponseJsonConverter">
+            <summary>
+            This custom JsonConverter is used to deserialize DurableHttpResponse
+            messages and keep the Header's StringValues. StringValues otherwise cannot
+            be deserialized without losing their values.
             </summary>
         </member>
         <member name="T:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableTaskExtension">
@@ -347,26 +373,22 @@
             Gets a <see cref="T:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableOrchestrationClient"/> using configuration from a <see cref="T:Microsoft.Azure.WebJobs.OrchestrationClientAttribute"/> instance.
             </summary>
             <param name="attribute">The attribute containing the client configuration parameters.</param>
-            <returnJobsBuilder"/>.
-            </summary>
-            <param name="builder">The <see cref="T:Microsoft.Azure.WebJobs.IWebJobsBuilder"/> to configure.</param>
-            <returns>Returns the provided <see cref="T:Microsoft.Azure.WebJobs.IWebJobsBuilder"/>.</returns>
+            <returns>Returns a <see cref="T:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableOrchestrationClient"/> instance. The returned instance may be a cached instance.</returns>
         </member>
-        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableTaskJobHostConfigurationExtensions.AddDurableTask(Microsoft.Azure.WebJobs.IWebJobsBuilder,Microsoft.Extensions.Options.IOptions{Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableTaskOptions})">
-            <summary>
-            Adds the Durable Task extension to the provided <see cref="T:Microsoft.Azure.WebJobs.IWebJobsBuilder"/>.
-            </summary>
-            <param name="builder">The <see cref="T:Microsoft.Azure.WebJobs.IWebJobsBuilder"/> to configure.</param>
-            <param name="options">The configuration options for this extension.</param>
-            <returns>Returns the provided <see cref="T:Microsoft.Azure.WebJobs.IWebJobsBuilder"/>.</returns>
+        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableTaskExtension.Microsoft#Azure#WebJobs#IAsyncConverter{System#Net#Http#HttpRequestMessage,System#Net#Http#HttpResponseMessage}#ConvertAsync(System.Net.Http.HttpRequestMessage,System.Threading.CancellationToken)">
+            <inheritdoc/>
         </member>
-        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableTaskJobHostConfigurationExtensions.AddDurableTask(Microsoft.Azure.WebJobs.IWebJobsBuilder,System.Action{Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableTaskOptions})">
+        <member name="T:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableTaskJobHostConfigurationExtensions">
             <summary>
-            Adds the Durable Task extension to the provided <see cref="T:Microsoft.Azure.WebJobs.IWebJobsBuilder"/>.
+            Extension for registering a Durable Functions configuration with <c>JobHostConfiguration</c>.
             </summary>
-            <param name="builder">The <see cref="T:Microsoft.Azure.WebJobs.IWebJobsBuilder"/> to configure.</param>
-            <param name="configure">An <see cref="T:System.Action`1"/> to configure the provided <see cref="T:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableTaskOptions"/>.</param>
-            <returns>Returns the modified <paramref name="builder"/> object.</returns>
+        </member>
+        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableTaskJobHostConfigurationExtensions.UseDurableTask(Microsoft.Azure.WebJobs.JobHostConfiguration,Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableTaskExtension)">
+            <summary>
+            Enable running durable orchestrations implemented as functions.
+            </summary>
+            <param name="hostConfig">Configuration settings of the current <c>JobHost</c> instance.</param>
+            <param name="listenerConfig">Durable Functions configuration.</param>
         </member>
         <member name="T:Microsoft.Azure.WebJobs.Extensions.DurableTask.MessageSorter">
             <summary>
@@ -653,6 +675,8 @@
         <member name="T:Microsoft.Azure.WebJobs.Extensions.DurableTask.ITokenSource">
             <summary>
             Provides functionality available to sources of tokens.
+            Custom implementation of this interface must include the use
+            of [DataContract] and [DataMember] for serialization.
             </summary>
         </member>
         <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.ITokenSource.GetTokenAsync">
@@ -958,14 +982,9 @@
             Reserved name to know when a TaskActivity should be an HTTP activity.
             </summary>
         </member>
-        <member name="P:Microsoft.Azure.WebJobs.Extensions.DurableTask.Options.HttpOptions.DefaultAsyncRequestSleepTime">
+        <member name="P:Microsoft.Azure.WebJobs.Extensions.DurableTask.Options.HttpOptions.DefaultAsyncRequestSleepTimeMilliseconds">
             <summary>
             Time between the async http requests.
-            </summary>
-        </member>
-        <member name="P:Microsoft.Azure.WebJobs.Extensions.DurableTask.Options.HttpOptions.AsynchronousPatternEnabled">
-            <summary>
-            Boolean value specifying if an HTTP Request is async.
             </summary>
         </member>
         <member name="T:Microsoft.Azure.WebJobs.Extensions.DurableTask.Options.NotificationOptions">
@@ -1258,12 +1277,6 @@
             Connection string provider which resolves connection strings from the WebJobs context.
             </summary>
         </member>
-        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.WebJobsConnectionStringProvider.#ctor(Microsoft.Extensions.Configuration.IConfiguration)">
-            <summary>
-            Initializes a new instance of the <see cref="T:Microsoft.Azure.WebJobs.Extensions.DurableTask.WebJobsConnectionStringProvider"/> class.
-            </summary>
-            <param name="hostConfiguration">A <see cref="T:Microsoft.Extensions.Configuration.IConfiguration"/> object provided by the WebJobs host.</param>
-        </member>
         <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.WebJobsConnectionStringProvider.Resolve(System.String)">
             <inheritdoc />
         </member>
@@ -1350,7 +1363,22 @@
             The specified function does not exist, is disabled, or is not an orchestrator function.
             </exception>
             <exception cref="T:System.InvalidOperationException">
-            The current thread is different than the thread which started the orified function does not exist, is disabled, or is not an orchestrator function.
+            The current thread is different than the thread which started the orchestrator execution.
+            </exception>
+            <exception cref="T:Microsoft.Azure.WebJobs.FunctionFailedException">
+            The activity function failed with an unhandled exception.
+            </exception>
+        </member>
+        <member name="M:Microsoft.Azure.WebJobs.DurableContextExtensions.CallSubOrchestratorAsync(Microsoft.Azure.WebJobs.IInterleavingContext,System.String,System.Object)">
+            <summary>
+            Schedules an orchestrator function named <paramref name="functionName"/> for execution.
+            </summary>
+            <param name="context">The context object.</param>
+            <param name="functionName">The name of the orchestrator function to call.</param>
+            <param name="input">The JSON-serializeable input to pass to the orchestrator function.</param>
+            <returns>A durable task that completes when the called orchestrator function completes or fails.</returns>
+            <exception cref="T:System.ArgumentException">
+            The specified function does not exist, is disabled, or is not an orchestrator function.
             </exception>
             <exception cref="T:System.InvalidOperationException">
             The current thread is different than the thread which started the orchestrator execution.
@@ -1462,21 +1490,6 @@
             The current thread is different than the thread which started the orchestrator execution.
             </exception>
             <exception cref="T:Microsoft.Azure.WebJobs.FunctionFailedException">
-            The
-            <param name="functionName">The name of the orchestrator function to call.</param>
-            <param name="retryOptions">The retry option for the orchestrator function.</param>
-            <param name="input">The JSON-serializeable input to pass to the orchestrator function.</param>
-            <returns>A durable task that completes when the called orchestrator function completes or fails.</returns>
-            <exception cref="T:System.ArgumentNullException">
-            The retry option object is null.
-            </exception>
-            <exception cref="T:System.ArgumentException">
-            The specified function does not exist, is disabled, or is not an orchestrator function.
-            </exception>
-            <exception cref="T:System.InvalidOperationException">
-            The current thread is different than the thread which started the orchestrator execution.
-            </exception>
-            <exception cref="T:Microsoft.Azure.WebJobs.FunctionFailedException">
             The activity function failed with an unhandled exception.
             </exception>
         </member>
@@ -1557,22 +1570,6 @@
             <param name="instanceId">The unique ID of the instance to check.</param>
             <returns>An HTTP response which may include a 202 and location header or a 200 with the durable function output in the response body.</returns>
         </member>
-        <member name="M:Microsoft.Azure.WebJobs.DurableContextExtensions.WaitForCompletionOrCreateCheckStatusResponseAsync(Microsoft.Azure.WebJobs.IDurableOrchestrationClient,Microsoft.AspNetCore.Http.HttpRequest,System.String)">
-            <summary>
-            Creates an HTTP response which either contains a payload of management URLs for a non-completed instance
-            or contains the payload containing the output of the completed orchestration.
-            </summary>
-            <remarks>
-            If the orchestration instance completes within the default 10 second timeout, then the HTTP response payload will
-            contain the output of the orchestration instance formatted as JSON. However, if the orchestration does not
-            complete within this timeout, then the HTTP response will be identical to that of the
-            <see cref="M:Microsoft.Azure.WebJobs.IDurableOrchestrationClient.CreateCheckStatusResponse(Microsoft.AspNetCore.Http.HttpRequest,System.String)"/> API.
-            </remarks>
-            <param name="client">The client object.</param>
-            <param name="request">The HTTP request that triggered the current function.</param>
-            <param name="instanceId">The unique ID of the instance to check.</param>
-            <returns>An HTTP response which may include a 202 and location header or a 200 with the durable function output in the response body.</returns>
-        </member>
         <member name="M:Microsoft.Azure.WebJobs.DurableContextExtensions.WaitForCompletionOrCreateCheckStatusResponseAsync(Microsoft.Azure.WebJobs.IDurableOrchestrationClient,System.Net.Http.HttpRequestMessage,System.String,System.TimeSpan)">
             <summary>
             Creates an HTTP response which either contains a payload of management URLs for a non-completed instance
@@ -1583,23 +1580,6 @@
             contain the output of the orchestration instance formatted as JSON. However, if the orchestration does not
             complete within the specified timeout, then the HTTP response will be identical to that of the
             <see cref="M:Microsoft.Azure.WebJobs.IDurableOrchestrationClient.CreateCheckStatusResponse(System.Net.Http.HttpRequestMessage,System.String)"/> API.
-            </remarks>
-            <param name="client">The client object.</param>
-            <param name="request">The HTTP request that triggered the current function.</param>
-            <param name="instanceId">The unique ID of the instance to check.</param>
-            <param name="timeout">Total allowed timeout for output from the durable function. The default value is 10 seconds.</param>
-            <returns>An HTTP response which may include a 202 and location header or a 200 with the durable function output in the response body.</returns>
-        </member>
-        <member name="M:Microsoft.Azure.WebJobs.DurableContextExtensions.WaitForCompletionOrCreateCheckStatusResponseAsync(Microsoft.Azure.WebJobs.IDurableOrchestrationClient,Microsoft.AspNetCore.Http.HttpRequest,System.String,System.TimeSpan)">
-            <summary>
-            Creates an HTTP response which either contains a payload of management URLs for a non-completed instance
-            or contains the payload containing the output of the completed orchestration.
-            </summary>
-            <remarks>
-            If the orchestration instance completes within the specified timeout, then the HTTP response payload will
-            contain the output of the orchestration instance formatted as JSON. However, if the orchestration does not
-            complete within the specified timeout, then the HTTP response will be identical to that of the
-            <see cref="M:Microsoft.Azure.WebJobs.IDurableOrchestrationClient.CreateCheckStatusResponse(Microsoft.AspNetCore.Http.HttpRequest,System.String)"/> API.
             </remarks>
             <param name="client">The client object.</param>
             <param name="request">The HTTP request that triggered the current function.</param>
@@ -2179,23 +2159,14 @@
             </remarks>
             <param name="customStatusObject">The JSON-serializeable value to use as the orchestrator function's custom status.</param>
         </member>
-        <member name="M:Microsoft.Azure.WebJobs.IDurableOrchestrationContext.CallHttpAsync(System.Net.Http.HttpMethod,System.Uri)">
+        <member name="M:Microsoft.Azure.WebJobs.IDurableOrchestrationContext.CallHttpAsync(System.Net.Http.HttpMethod,System.Uri,System.String)">
             <summary>
             Makes an HTTP call to the specified uri.
             </summary>
             <param name="method">HttpMethod used for api call.</param>
             <param name="uri">uri used to make the HTTP call.</param>
+            <param name="content">Content passed in the HTTP request.</param>
             <returns>A <see cref="T:System.Threading.Tasks.Task`1"/>Result of the HTTP call.</returns>
-        </member>
-        <member name="M:Microsoft.Azure.WebJobs.IDurableOrchestrationContext.CallHttpAsync(System.Net.Http.HttpMethod,System.Uri,Microsoft.Azure.WebJobs.Extensions.DurableTask.ITokenSource)">
-            <summary>
-            Makes an HTTP call to the specified uri with authentication information
-            to get a token.
-            </summary>
-            <param name="method">HttpMethod used for api call.</param>
-            <param name="uri">uri used to make the HTTP call.</param>
-            <param name="tokenSource">information to get a token from a specified service.</param>
-            <returns>A <see cref="T:System.Threading.Tasks.Task`1"/> Result of the HTTP call.</returns>
         </member>
         <member name="M:Microsoft.Azure.WebJobs.IDurableOrchestrationContext.CallHttpAsync(Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableHttpRequest)">
             <summary>

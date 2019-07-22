@@ -45,7 +45,6 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
             string storageProviderType = AzureStorageProviderType,
             bool autoFetchLargeMessages = true,
             int httpAsyncSleepTime = 5000,
-            bool asynchronousPatternEnabled = true,
             IDurableHttpMessageHandlerFactory durableHttpMessageHandler = null)
         {
             var durableTaskOptions = new DurableTaskOptions
@@ -67,8 +66,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
                 },
                 HttpSettings = new HttpOptions()
                 {
-                    DefaultAsyncRequestSleepTime = httpAsyncSleepTime,
-                    AsynchronousPatternEnabled = asynchronousPatternEnabled,
+                    DefaultAsyncRequestSleepTimeMilliseconds = httpAsyncSleepTime,
                 },
                 NotificationUrl = notificationUrl,
                 ExtendedSessionsEnabled = enableExtendedSessions,

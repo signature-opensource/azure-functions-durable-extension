@@ -15,16 +15,11 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Options
         /// <summary>
         /// Reserved name to know when a TaskActivity should be an HTTP activity.
         /// </summary>
-        public const string HttpTaskActivityReservedName = "Durable:Http:Async:Activity:Function";
+        internal const string HttpTaskActivityReservedName = "Durable:Http:Async:Activity:Function";
 
         /// <summary>
         /// Time between the async http requests.
         /// </summary>
-        public int DefaultAsyncRequestSleepTime { get; set; } = 5000;
-
-        /// <summary>
-        /// Boolean value specifying if an HTTP Request is async.
-        /// </summary>
-        public bool AsynchronousPatternEnabled { get; set; } = true;
+        public int DefaultAsyncRequestSleepTimeMilliseconds { get; set; } = 5000;
     }
 }

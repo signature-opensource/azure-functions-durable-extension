@@ -410,7 +410,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
 
         public static DurableHttpRequest ConvertTestRequestToDurableHttpRequest(TestDurableHttpRequest testRequest)
         {
-            DurableHttpRequest durableHttpRequest = new DurableHttpRequest(testRequest.HttpMethod, new Uri("https://www.dummy-url.com"));
+            DurableHttpRequest durableHttpRequest = new DurableHttpRequest(testRequest.HttpMethod, new Uri(testRequest.Uri));
             if (testRequest.Headers != null)
             {
                 foreach (KeyValuePair<string, string> header in testRequest.Headers)
@@ -438,6 +438,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
             {
                 durableHttpRequest.TokenSource = testRequest.TokenSource;
             }
+
+            durableHttpRequest.AsynchronousPatternEnabled = testRequest.AsynchronousPatternEnabled;
 
             return durableHttpRequest;
         }

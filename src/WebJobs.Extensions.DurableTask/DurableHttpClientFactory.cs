@@ -20,7 +20,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
                 this.durableHttpClient = new HttpClient(handler.CreateHttpMessageHandler());
 
                 var assembly = typeof(DurableTaskExtension).Assembly;
-                Version assemblyVersion = GetAssemblyVersion();
+                Version assemblyVersion = GetAssemblyVersion(assembly);
 
                 this.durableHttpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue(
                     assembly.GetName().Name,
@@ -30,9 +30,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
             return this.durableHttpClient;
         }
 
-        private static Version GetAssemblyVersion()
+        private static Version GetAssemblyVersion(Assembly assembly)
         {
-            var assembly = typeof(DurableTaskExtension).Assembly;
             var assemblyInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
             var assemblyVersion = new Version(
                 assemblyInfo.FileMajorPart,

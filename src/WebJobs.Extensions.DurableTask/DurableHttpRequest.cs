@@ -25,7 +25,6 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
             this.Method = method;
             this.Uri = uri;
             this.Headers = new Dictionary<string, StringValues>(StringComparer.OrdinalIgnoreCase);
-            this.TokenSource = null;
         }
 
         /// <summary>
@@ -41,7 +40,6 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
         /// <summary>
         /// Headers passed with the HTTP request made by the Durable Function.
         /// </summary>
-        // TODO: Need to change this to IDictionary<string, StringValues>
         public IDictionary<string, StringValues> Headers { get; set; }
 
         /// <summary>
@@ -54,5 +52,11 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
         /// </summary>
         [JsonProperty(TypeNameHandling = TypeNameHandling.Auto)]
         public ITokenSource TokenSource { get; set; }
+
+                /// <summary>
+        /// Specifies whether the Durable HTTP APIs should automatically
+        /// handle the asynchronous HTTP pattern.
+        /// </summary>
+        public bool AsynchronousPatternEnabled { get; set; } = true;
     }
 }

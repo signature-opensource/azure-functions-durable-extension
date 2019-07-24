@@ -38,6 +38,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
             CreateTimer = 5,
             WaitForExternalEvent = 6,
             CallEntity = 7,
+            CallHttp = 8,
         }
 
         public override DurableCommonContext Context => this.context;
@@ -260,6 +261,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
                         case AsyncActionType.WaitForExternalEvent:
                             tasks.Add(this.Context.WaitForExternalEvent<object>(action.ExternalEventName, "ExternalEvent"));
                             break;
+                        case AsyncActionType.CallHttp:
+                            tasks.Add(((IDurableOrchestrationContext)this.context).CallHttpAsync(action.HttpRequest));
+                            break;
                         default:
                             break;
                     }
@@ -317,6 +321,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
 
             [JsonProperty("instanceId")]
             internal string InstanceId { get; set; }
+
+            [JsonProperty("httpRequest")]
+            internal DurableHttpRequest HttpRequest { get; set; }
         }
     }
 }

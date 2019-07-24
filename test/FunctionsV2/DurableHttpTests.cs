@@ -18,6 +18,7 @@ using Microsoft.Extensions.Primitives;
 using Moq;
 using Moq.Protected;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -69,6 +70,54 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
         private static bool IsLogFriendlyPlatform()
         {
             return !RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+        }
+
+        [Fact]
+        [Trait("Category", PlatformSpecificHelpers.TestCategory)]
+        public void DeserializeCallActivity()
+        {
+            // {
+            //   "method": "POST",
+            //   "uri": "https://example.com",
+            //   "headers": {
+            //     "Content-Type": "application/json",
+            //     "Accept": [
+            //       "application/json",
+            //       "application/xml"
+            //     ],
+            //     "x-ms-foo": []
+            //   },
+            //   "content": "5"
+            // }
+            var json = new JObject(
+                new JProperty("method", "POST"),
+                new JProperty("uri", "https://example.com"),
+                new JProperty("headers", new JObject(
+                    new JProperty("Content-Type", "application/json"),
+                    new JProperty("Accept", new JArray(
+                        "application/json",
+                        "application/xml")),
+                    new JProperty("x-ms-foo", new JArray()))),
+                new JProperty("content", "5"));
+
+            DurableHttpRequest request = JsonConvert.DeserializeObject<DurableHttpRequest>(json.ToString());
+            Assert.NotNull(request);
+            Assert.Equal(HttpMethod.Post, request.Method);
+            Assert.Equal(new Uri("https://example.com"), request.Uri);
+            Assert.Equal("5", request.Content);
+            Assert.Equal(3, request.Headers.Count);
+
+            Assert.True(request.Headers.TryGetValue("Content-Type", out StringValues contentTypeValues));
+            Assert.Single(contentTypeValues);
+            Assert.Equal("application/json", contentTypeValues[0]);
+
+            Assert.True(request.Headers.TryGetValue("Accept", out StringValues acceptValues));
+            Assert.Equal(2, acceptValues.Count);
+            Assert.Equal("application/json", acceptValues[0]);
+            Assert.Equal("application/xml", acceptValues[1]);
+
+            Assert.True(request.Headers.TryGetValue("x-ms-foo", out StringValues customHeaderValues));
+            Assert.Empty(customHeaderValues);
         }
 
         /// <summary>

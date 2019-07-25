@@ -2,19 +2,14 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Reflection;
 using System.Runtime.ExceptionServices;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using DurableTask.Core;
-using DurableTask.Core.Exceptions;
-using DurableTask.Core.History;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask.Options;
 using Microsoft.Extensions.Primitives;
 using Newtonsoft.Json;
@@ -59,6 +54,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
         private string OrchestrationName => this.FunctionName;
 
         internal override FunctionType FunctionType => FunctionType.Orchestrator;
+
+        /// <inheritdoc />
+        string IDurableOrchestrationContext.Name => this.OrchestrationName;
 
         /// <inheritdoc />
         string IDurableOrchestrationContext.InstanceId => this.InstanceId;
@@ -113,7 +111,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
         /// If this method is not called explicitly, the return value of the orchestrator function is used as the output.
         /// </remarks>
         /// <param name="output">The JSON-serializeable value to use as the orchestrator function output.</param>
-        internal void SetOutput(object output)
+        public void SetOutput(object output)
         {
             this.ThrowIfInvalidAccess();
 

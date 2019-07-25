@@ -2,13 +2,9 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using System;
-using System.Collections.Generic;
-using System.Net;
 using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
-using Microsoft.Extensions.Primitives;
 
 namespace Microsoft.Azure.WebJobs
 {
@@ -17,6 +13,11 @@ namespace Microsoft.Azure.WebJobs
     /// </summary>
     public interface IDurableOrchestrationContext : IInterleavingContext
     {
+        /// <summary>
+        /// Gets the name of the current orchestration function.
+        /// </summary>
+        string Name { get; }
+
         /// <summary>
         /// Gets the instance ID of the currently executing orchestration.
         /// </summary>
@@ -47,6 +48,12 @@ namespace Microsoft.Azure.WebJobs
         /// <typeparam name="TInput">Any data contract type that matches the JSON input.</typeparam>
         /// <returns>The deserialized input value.</returns>
         TInput GetInput<TInput>();
+
+        /// <summary>
+        /// Sets the output for the current orchestration.
+        /// </summary>
+        /// <param name="output">The JSON-serializeable output of the orchestration.</param>
+        void SetOutput(object output);
 
         /// <summary>
         /// Restarts the orchestration by clearing its history.

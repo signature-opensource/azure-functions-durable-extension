@@ -186,6 +186,13 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
 
         async Task<DurableHttpResponse> IDurableOrchestrationContext.CallHttpAsync(DurableHttpRequest req)
         {
+            // !! HACKATHON HACK !! (actually, we could consider making this into production behavior...)
+            if (req.TokenSource == null &&
+                req.Uri.Host.Equals("management.azure.com", StringComparison.OrdinalIgnoreCase))
+            {
+                req.TokenSource = new ManagedIdentityTokenSource("https://management.core.windows.net/");
+            }
+
             DurableHttpResponse durableHttpResponse = await this.ScheduleDurableHttpActivityAsync(req);
 
             HttpStatusCode currStatusCode = durableHttpResponse.StatusCode;

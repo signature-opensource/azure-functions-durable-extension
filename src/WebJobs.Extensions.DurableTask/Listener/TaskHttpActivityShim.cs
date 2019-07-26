@@ -86,7 +86,14 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Listener
 
             if (durableHttpRequest.Content != null)
             {
-                requestMessage.Content = JsonConvert.DeserializeObject<HttpContent>(durableHttpRequest.Content);
+                requestMessage.Content = new StringContent(durableHttpRequest.Content);
+
+                // hack
+                if (durableHttpRequest.Content.StartsWith("{") &&
+                    !durableHttpRequest.Headers.ContainsKey("Content-Type"))
+                {
+                    requestMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+                }
             }
 
             if (durableHttpRequest.TokenSource != null)

@@ -34,14 +34,14 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
 
         private bool isReplaying;
 
-        internal DurableCommonContext(DurableTaskExtension config, string functionName)
+        internal DurableCommonContext(DurableTaskExtensionBase config, string functionName)
         {
             this.Config = config ?? throw new ArgumentNullException(nameof(config));
             this.FunctionName = functionName;
             this.EntityMessageReorderWindow = TimeSpan.FromMinutes(config.Options.EntityMessageReorderWindowInMinutes);
         }
 
-        internal DurableTaskExtension Config { get; }
+        internal DurableTaskExtensionBase Config { get; }
 
         internal string FunctionName { get; }
 

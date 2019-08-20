@@ -36,12 +36,12 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
         private readonly string hubName;
         private readonly HttpApiHandler httpApiHandler;
         private readonly EndToEndTraceHelper traceHelper;
-        private readonly DurableTaskExtension config;
+        private readonly DurableTaskExtensionBase config;
         private readonly OrchestrationClientAttribute attribute; // for rehydrating a Client after a webhook
 
         internal DurableOrchestrationClient(
             IOrchestrationServiceClient serviceClient,
-            DurableTaskExtension config,
+            DurableTaskExtensionBase config,
             HttpApiHandler httpHandler,
             OrchestrationClientAttribute attribute)
         {

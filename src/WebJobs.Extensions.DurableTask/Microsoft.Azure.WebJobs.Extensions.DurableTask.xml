@@ -323,7 +323,33 @@
             <param name="orchestrationServiceFactory">The factory used to create orchestration service based on the configured storage provider.</param>
             <param name="durableHttpMessageHandlerFactory">The HTTP message handler that handles HTTP requests and HTTP responses.</param>
         </member>
-        <member name="P:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableTaskExtension.HubName">
+        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableTaskExtension.Microsoft#Azure#WebJobs#Host#Config#IExtensionConfigProvider#Initialize(Microsoft.Azure.WebJobs.Host.Config.ExtensionConfigContext)">
+            <summary>
+            Internal initialization call from the WebJobs host.
+            </summary>
+            <param name="context">Extension context provided by WebJobs.</param>
+        </member>
+        <member name="T:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableTaskExtensionBase">
+            <summary>
+            Configuration for the Durable Functions extension.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableTaskExtensionBase.#ctor">
+            <summary>
+            Obsolete. Please use an alternate constructor overload.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableTaskExtensionBase.#ctor(Microsoft.Extensions.Options.IOptions{Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableTaskOptions},Microsoft.Extensions.Logging.ILoggerFactory,Microsoft.Azure.WebJobs.INameResolver,Microsoft.Azure.WebJobs.Extensions.DurableTask.IOrchestrationServiceFactory,Microsoft.Azure.WebJobs.Extensions.DurableTask.IDurableHttpMessageHandlerFactory)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableTaskExtension"/>.
+            </summary>
+            <param name="options">The configuration options for this extension.</param>
+            <param name="loggerFactory">The logger factory used for extension-specific logging and orchestration tracking.</param>
+            <param name="nameResolver">The name resolver to use for looking up application settings.</param>
+            <param name="orchestrationServiceFactory">The factory used to create orchestration service based on the configured storage provider.</param>
+            <param name="durableHttpMessageHandlerFactory">The HTTP message handler that handles HTTP requests and HTTP responses.</param>
+        </member>
+        <member name="P:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableTaskExtensionBase.HubName">
             <summary>
             Gets or sets default task hub name to be used by all <see cref="T:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableOrchestrationClient"/>,
             <see cref="T:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableOrchestrationContext"/>, and <see cref="T:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableActivityContext"/> instances.
@@ -334,25 +360,25 @@
             </remarks>
             <value>The name of the default task hub.</value>
         </member>
-        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableTaskExtension.Microsoft#Azure#WebJobs#Host#Config#IExtensionConfigProvider#Initialize(Microsoft.Azure.WebJobs.Host.Config.ExtensionConfigContext)">
+        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableTaskExtensionBase.Initialize(Microsoft.Azure.WebJobs.Host.Config.ExtensionConfigContext)">
             <summary>
             Internal initialization call from the WebJobs host.
             </summary>
             <param name="context">Extension context provided by WebJobs.</param>
         </member>
-        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableTaskExtension.DeleteTaskHubAsync">
+        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableTaskExtensionBase.DeleteTaskHubAsync">
             <summary>
             Deletes all data stored in the current task hub.
             </summary>
             <returns>A task representing the async delete operation.</returns>
         </member>
-        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableTaskExtension.DurableTask#Core#INameVersionObjectManager{DurableTask#Core#TaskOrchestration}#Add(DurableTask.Core.ObjectCreator{DurableTask.Core.TaskOrchestration})">
+        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableTaskExtensionBase.DurableTask#Core#INameVersionObjectManager{DurableTask#Core#TaskOrchestration}#Add(DurableTask.Core.ObjectCreator{DurableTask.Core.TaskOrchestration})">
             <summary>
             Called by the Durable Task Framework: Not used.
             </summary>
             <param name="creator">This parameter is not used.</param>
         </member>
-        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableTaskExtension.DurableTask#Core#INameVersionObjectManager{DurableTask#Core#TaskOrchestration}#GetObject(System.String,System.String)">
+        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableTaskExtensionBase.DurableTask#Core#INameVersionObjectManager{DurableTask#Core#TaskOrchestration}#GetObject(System.String,System.String)">
             <summary>
             Called by the Durable Task Framework: Returns the specified <see cref="T:DurableTask.Core.TaskOrchestration"/>.
             </summary>
@@ -360,13 +386,13 @@
             <param name="version">Not used.</param>
             <returns>An orchestration shim that delegates execution to an orchestrator function.</returns>
         </member>
-        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableTaskExtension.DurableTask#Core#INameVersionObjectManager{DurableTask#Core#TaskActivity}#Add(DurableTask.Core.ObjectCreator{DurableTask.Core.TaskActivity})">
+        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableTaskExtensionBase.DurableTask#Core#INameVersionObjectManager{DurableTask#Core#TaskActivity}#Add(DurableTask.Core.ObjectCreator{DurableTask.Core.TaskActivity})">
             <summary>
             Called by the durable task framework: Not used.
             </summary>
             <param name="creator">This parameter is not used.</param>
         </member>
-        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableTaskExtension.DurableTask#Core#INameVersionObjectManager{DurableTask#Core#TaskActivity}#GetObject(System.String,System.String)">
+        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableTaskExtensionBase.DurableTask#Core#INameVersionObjectManager{DurableTask#Core#TaskActivity}#GetObject(System.String,System.String)">
             <summary>
             Called by the Durable Task Framework: Returns the specified <see cref="T:DurableTask.Core.TaskActivity"/>.
             </summary>
@@ -374,14 +400,14 @@
             <param name="version">Not used.</param>
             <returns>An activity shim that delegates execution to an activity function.</returns>
         </member>
-        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableTaskExtension.GetClient(Microsoft.Azure.WebJobs.OrchestrationClientAttribute)">
+        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableTaskExtensionBase.GetClient(Microsoft.Azure.WebJobs.OrchestrationClientAttribute)">
             <summary>
             Gets a <see cref="T:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableOrchestrationClient"/> using configuration from a <see cref="T:Microsoft.Azure.WebJobs.OrchestrationClientAttribute"/> instance.
             </summary>
             <param name="attribute">The attribute containing the client configuration parameters.</param>
             <returns>Returns a <see cref="T:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableOrchestrationClient"/> instance. The returned instance may be a cached instance.</returns>
         </member>
-        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableTaskExtension.Microsoft#Azure#WebJobs#IAsyncConverter{System#Net#Http#HttpRequestMessage,System#Net#Http#HttpResponseMessage}#ConvertAsync(System.Net.Http.HttpRequestMessage,System.Threading.CancellationToken)">
+        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableTaskExtensionBase.Microsoft#Azure#WebJobs#IAsyncConverter{System#Net#Http#HttpRequestMessage,System#Net#Http#HttpResponseMessage}#ConvertAsync(System.Net.Http.HttpRequestMessage,System.Threading.CancellationToken)">
             <inheritdoc/>
         </member>
         <member name="T:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableTaskJobHostConfigurationExtensions">

@@ -5,6 +5,7 @@ using Microsoft.Azure.WebJobs.Description;
 using Microsoft.Azure.WebJobs.Host.Config;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask.Options;
 
 namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
 {
@@ -18,13 +19,20 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
         DurableTaskExtensionBase,
         IExtensionConfigProvider
     {
-        public DurableTaskExtensionRedisConfig(IOptions<DurableTaskOptions> options,
+        /// <inheritdoc />
+        public DurableTaskExtensionRedisConfig(IOptions<DurableTaskRedisOptions> options,
             ILoggerFactory loggerFactory,
             INameResolver nameResolver,
             IOrchestrationServiceFactory orchestrationServiceFactory,
             IDurableHttpMessageHandlerFactory durableHttpMessageHandlerFactory = null) 
-            : base(options, loggerFactory, nameResolver, orchestrationServiceFactory, durableHttpMessageHandlerFactory)
+            : base(options.Value, loggerFactory, nameResolver, orchestrationServiceFactory, durableHttpMessageHandlerFactory)
         {
+        }
+
+        /// <inheritdoc />
+        public override DurableTaskOptions GetDefaultDurableTaskOptions()
+        {
+            return new DurableTaskRedisOptions();
         }
 
         void IExtensionConfigProvider.Initialize(ExtensionConfigContext context)

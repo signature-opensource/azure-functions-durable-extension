@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Microsoft.Azure.WebJobs.Extensions.DurableTask.Emulator</name>
+    </assembly>
+    <members>
+        <member name="T:Microsoft.Azure.WebJobs.Extensions.DurableTask.Options.DurableTaskEmulatorOptions">
+            <summary>
+            Durable Task options for the in-memory emulator flavored Durable Task extension.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Azure.WebJobs.Extensions.DurableTask.Options.DurableTaskEmulatorOptions.Emulator">
+            <summary>
+            Section of configuration for the in-memory emulator provider.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Azure.WebJobs.Extensions.DurableTask.Options.DurableTaskEmulatorOptions.StorageOptions">
+            <inheritdoc />
+        </member>
+        <member name="T:Microsoft.Azure.WebJobs.Extensions.DurableTask.Options.EmulatorStorageOptions">
+            <summary>
+            Configuration options for the Emulator storage provider.
+            </summary>
+            <remarks>
+            At this time, there is no configuration available for the Emulator storage provider.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Azure.WebJobs.Extensions.DurableTask.Options.EmulatorStorageOptions.ConnectionDetails">
+            <inheritdoc />
+        </member>
+        <member name="P:Microsoft.Azure.WebJobs.Extensions.DurableTask.Options.EmulatorStorageOptions.StorageTypeName">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.Options.EmulatorStorageOptions.GetValues">
+            <inheritdoc />
+        </member>
+        <member name="T:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableTaskExtensionEmulatorConfig">
+            <summary>
+            Configuration for the Durable Functions extension.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableTaskExtensionEmulatorConfig.#ctor(Microsoft.Extensions.Options.IOptions{Microsoft.Azure.WebJobs.Extensions.DurableTask.Options.DurableTaskEmulatorOptions},Microsoft.Extensions.Logging.ILoggerFactory,Microsoft.Azure.WebJobs.INameResolver,Microsoft.Azure.WebJobs.Extensions.DurableTask.IOrchestrationServiceFactory,Microsoft.Azure.WebJobs.Extensions.DurableTask.IDurableHttpMessageHandlerFactory)">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableTaskExtensionEmulatorConfig.GetDefaultDurableTaskOptions">
+            <inheritdoc />
+        </member>
+        <member name="T:Microsoft.Azure.WebJobs.Extensions.DurableTask.EmulatorDurableTaskJobHostConfigurationExtensions">
+            <summary>
+            Extension for registering a Durable Functions configuration with <c>JobHostConfiguration</c>.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.EmulatorDurableTaskJobHostConfigurationExtensions.Use(Microsoft.Azure.WebJobs.JobHostConfiguration,Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableTaskExtensionEmulatorConfig)">
+            <summary>
+            Enable running durable orchestrations implemented as functions.
+            </summary>
+            <param name="hostConfig">Configuration settings of the current <c>JobHost</c> instance.</param>
+            <param name="listenerConfig">Durable Functions configuration.</param>
+        </member>
+    </members>
+</doc>

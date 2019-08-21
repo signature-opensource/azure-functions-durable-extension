@@ -1,7 +1,10 @@
 ﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using System;
 using System.Net.Http;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask.Azure;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask.Options;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -18,23 +21,17 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
         public const string FlakeyTestCategory = TestCategory + "_Flakey";
 
         public static JobHost CreateJobHost(
-            IOptions<DurableTaskOptions> options,
+            DurableTaskOptions options,
             ILoggerProvider loggerProvider,
             INameResolver nameResolver,
             IDurableHttpMessageHandlerFactory durableHttpMessageHandler)
         {
             var config = new JobHostConfiguration { HostId = "durable-task-host" };
             config.TypeLocator = TestHelpers.GetTypeLocator();
-
-            var connectionResolver = new WebJobsConnectionStringProvider();
-
             var loggerFactory = new LoggerFactory();
             loggerFactory.AddProvider(loggerProvider);
 
-            IOrchestrationServiceFactory orchestrationServiceFactory = new OrchestrationServiceFactory(options, connectionResolver);
-
-            var extension = new DurableTaskExtension(options, loggerFactory, nameResolver, orchestrationServiceFactory, durableHttpMessageHandler);
-            config.UseDurableTask(extension);
+            RegisterConfigBasedOnStorageProvider(config, options, loggerFactory, nameResolver, durableHttpMessageHandler);
 
             // Mock INameResolver for not setting EnvironmentVariables.
             if (nameResolver != null)
@@ -51,6 +48,53 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
 
             var host = new JobHost(config);
             return host;
+        }
+
+        private static void RegisterConfigBasedOnStorageProvider(
+            JobHostConfiguration config,
+            DurableTaskOptions options,
+            LoggerFactory loggerFactory,
+            INameResolver nameResolver,
+            IDurableHttpMessageHandlerFactory durableHttpMessageHandler)
+        {
+            switch (options)
+            {
+                case DurableTaskAzureStorageOptions azureOptions:
+                    {
+                        var connectionResolver = new WebJobsConnectionStringProvider();
+                        var orchestrationServiceFactory = new AzureStorageOrchestrationServiceFactory(azureOptions, connectionResolver);
+
+                        var wrappedOptions = new OptionsWrapper<DurableTaskAzureStorageOptions>(azureOptions);
+                        var extension = new DurableTaskExtensionAzureStorageConfig(wrappedOptions, loggerFactory, nameResolver, orchestrationServiceFactory, durableHttpMessageHandler);
+
+                        config.Use(extension);
+                    }
+
+                    break;
+                case DurableTaskRedisOptions redisOptions:
+                    {
+                        var connectionResolver = new WebJobsConnectionStringProvider();
+                        var orchestrationServiceFactory = new RedisOrchestrationServiceFactory(redisOptions, connectionResolver);
+                        var wrappedOptions = new OptionsWrapper<DurableTaskRedisOptions>(redisOptions);
+                        var extension = new DurableTaskExtensionRedisConfig(wrappedOptions, loggerFactory, nameResolver, orchestrationServiceFactory, durableHttpMessageHandler);
+
+                        config.Use(extension);
+                    }
+
+                    break;
+                case DurableTaskEmulatorOptions emulatorOptions:
+                    {
+                        var orchestrationServiceFactory = new EmulatorOrchestrationServiceFactory(emulatorOptions);
+                        var wrappedOptions = new OptionsWrapper<DurableTaskEmulatorOptions>(emulatorOptions);
+                        var extension = new DurableTaskExtensionEmulatorConfig(wrappedOptions, loggerFactory, nameResolver, orchestrationServiceFactory, durableHttpMessageHandler);
+
+                        config.Use(extension);
+                    }
+
+                    break;
+                default:
+                    throw new InvalidOperationException($"The DurableTaskOptions of type {options.GetType()} is not supported for tests in Functions V1.");
+            }
         }
     }
 }

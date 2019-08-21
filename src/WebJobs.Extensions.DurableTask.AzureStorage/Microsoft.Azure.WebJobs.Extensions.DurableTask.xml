@@ -1,0 +1,167 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Microsoft.Azure.WebJobs.Extensions.DurableTask.Azure</name>
+    </assembly>
+    <members>
+        <member name="T:Microsoft.Azure.WebJobs.Extensions.DurableTask.AzureStorageDurableTaskJobHostConfigurationExtensions">
+            <summary>
+            Extension for registering a Durable Functions configuration with <c>JobHostConfiguration</c>.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.AzureStorageDurableTaskJobHostConfigurationExtensions.Use(Microsoft.Azure.WebJobs.JobHostConfiguration,Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableTaskExtensionAzureStorageConfig)">
+            <summary>
+            Enable running durable orchestrations implemented as functions.
+            </summary>
+            <param name="hostConfig">Configuration settings of the current <c>JobHost</c> instance.</param>
+            <param name="listenerConfig">Durable Functions configuration.</param>
+        </member>
+        <member name="T:Microsoft.Azure.WebJobs.Extensions.DurableTask.Options.AzureStorageOptions">
+            <summary>
+            Configuration options for the Azure Storage storage provider.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Azure.WebJobs.Extensions.DurableTask.Options.AzureStorageOptions.ConnectionStringName">
+            <summary>
+            Gets or sets the name of the Azure Storage connection string used to manage the underlying Azure Storage resources.
+            </summary>
+            <remarks>
+            If not specified, the default behavior is to use the standard `AzureWebJobsStorage` connection string for all storage usage.
+            </remarks>
+            <value>The name of a connection string that exists in the app's application settings.</value>
+        </member>
+        <member name="P:Microsoft.Azure.WebJobs.Extensions.DurableTask.Options.AzureStorageOptions.ConnectionDetails">
+            <inheritdoc/>
+        </member>
+        <member name="P:Microsoft.Azure.WebJobs.Extensions.DurableTask.Options.AzureStorageOptions.ControlQueueBatchSize">
+            <summary>
+            Gets or sets the number of messages to pull from the control queue at a time.
+            </summary>
+            <remarks>
+            Messages pulled from the control queue are buffered in memory until the internal
+            dispatcher is ready to process them.
+            </remarks>
+            <value>A positive integer configured by the host. The default value is <c>32</c>.</value>
+        </member>
+        <member name="P:Microsoft.Azure.WebJobs.Extensions.DurableTask.Options.AzureStorageOptions.PartitionCount">
+            <summary>
+            Gets or sets the partition count for the control queue.
+            </summary>
+            <remarks>
+            Increasing the number of partitions will increase the number of workers
+            that can concurrently execute orchestrator functions. However, increasing
+            the partition count can also increase the amount of load placed on the storage
+            account and on the thread pool if the number of workers is smaller than the
+            number of partitions.
+            </remarks>
+            <value>A positive integer between 1 and 16. The default value is <c>4</c>.</value>
+        </member>
+        <member name="P:Microsoft.Azure.WebJobs.Extensions.DurableTask.Options.AzureStorageOptions.ControlQueueVisibilityTimeout">
+            <summary>
+            Gets or sets the visibility timeout of dequeued control queue messages.
+            </summary>
+            <value>
+            A <c>TimeSpan</c> configured by the host. The default is 5 minutes.
+            </value>
+        </member>
+        <member name="P:Microsoft.Azure.WebJobs.Extensions.DurableTask.Options.AzureStorageOptions.WorkItemQueueVisibilityTimeout">
+            <summary>
+            Gets or sets the visibility timeout of dequeued work item queue messages.
+            </summary>
+            <value>
+            A <c>TimeSpan</c> configured by the host. The default is 5 minutes.
+            </value>
+        </member>
+        <member name="P:Microsoft.Azure.WebJobs.Extensions.DurableTask.Options.AzureStorageOptions.TrackingStoreConnectionStringName">
+            <summary>
+            Gets or sets the name of the Azure Storage connection string to use for the
+            durable tracking store (History and Instances tables).
+            </summary>
+            <remarks><para>
+            If not specified, the <see cref="P:Microsoft.Azure.WebJobs.Extensions.DurableTask.Options.AzureStorageOptions.ConnectionStringName"/> connection string
+            is used for the durable tracking store.
+            </para><para>
+            This property is primarily useful when deploying multiple apps that need to share the same
+            tracking infrastructure. For example, when deploying two versions of an app side by side, using
+            the same tracking store allows both versions to save history into the same table, which allows
+            clients to query for instance status across all versions.
+            </para></remarks>
+            <value>The name of a connection string that exists in the app's application settings.</value>
+        </member>
+        <member name="P:Microsoft.Azure.WebJobs.Extensions.DurableTask.Options.AzureStorageOptions.TrackingStoreNamePrefix">
+            <summary>
+            Gets or sets the name prefix to use for history and instance tables in Azure Storage.
+            </summary>
+            <remarks>
+            This property is only used when <see cref="P:Microsoft.Azure.WebJobs.Extensions.DurableTask.Options.AzureStorageOptions.TrackingStoreConnectionStringName"/> is specified.
+            If no prefix is specified, the default prefix value is "DurableTask".
+            </remarks>
+            <value>The prefix to use when naming the generated Azure tables.</value>
+        </member>
+        <member name="P:Microsoft.Azure.WebJobs.Extensions.DurableTask.Options.AzureStorageOptions.FetchLargeMessagesAutomatically">
+            <summary>
+            Gets or sets whether the extension will automatically fetch large messages in orchestration status
+            queries. If set to false, the extension will return large messages as a blob url.
+            </summary>
+            <value>A boolean indicating whether will automatically fetch large messages .</value>
+        </member>
+        <member name="P:Microsoft.Azure.WebJobs.Extensions.DurableTask.Options.AzureStorageOptions.MaxQueuePollingInterval">
+            <summary>
+            Gets or sets the maximum queue polling interval.
+            </summary>
+            <value>Maximum interval for polling control and work-item queues.</value>
+        </member>
+        <member name="P:Microsoft.Azure.WebJobs.Extensions.DurableTask.Options.AzureStorageOptions.StorageTypeName">
+            <inheritdoc/>
+        </member>
+        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.Options.AzureStorageOptions.ValidateHubName(System.String)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.Options.AzureStorageOptions.Validate">
+            <inheritdoc/>
+        </member>
+        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.Options.AzureStorageOptions.GetValues">
+            <inheritdoc/>
+        </member>
+        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.Options.AzureStorageOptions.GetOrchestrationServiceFactory">
+            <inheritdoc/>
+        </member>
+        <member name="T:Microsoft.Azure.WebJobs.Extensions.DurableTask.Options.DurableTaskAzureStorageOptions">
+            <summary>
+            Durable Task options for the Azure Storage flavored Durable Task extension.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Azure.WebJobs.Extensions.DurableTask.Options.DurableTaskAzureStorageOptions.AzureStorageProvider">
+            <summary>
+            Section of configuration for the Azure Storage provider.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Azure.WebJobs.Extensions.DurableTask.Options.DurableTaskAzureStorageOptions.StorageOptions">
+            <inheritdoc/>
+        </member>
+        <member name="T:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableTaskExtensionAzureStorageConfig">
+            <summary>
+            Configuration for the Durable Functions extension.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableTaskExtensionAzureStorageConfig.#ctor(Microsoft.Extensions.Options.IOptions{Microsoft.Azure.WebJobs.Extensions.DurableTask.Options.DurableTaskAzureStorageOptions},Microsoft.Extensions.Logging.ILoggerFactory,Microsoft.Azure.WebJobs.INameResolver,Microsoft.Azure.WebJobs.Extensions.DurableTask.IOrchestrationServiceFactory,Microsoft.Azure.WebJobs.Extensions.DurableTask.IDurableHttpMessageHandlerFactory)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableTaskExtensionAzureStorageConfig"/>.
+            </summary>
+            <param name="options">The configuration options for this extension.</param>
+            <param name="loggerFactory">The logger factory used for extension-specific logging and orchestration tracking.</param>
+            <param name="nameResolver">The name resolver to use for looking up application settings.</param>
+            <param name="orchestrationServiceFactory">The factory used to create orchestration service based on the configured storage provider.</param>
+            <param name="durableHttpMessageHandlerFactory">The HTTP message handler that handles HTTP requests and HTTP responses.</param>
+        </member>
+        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableTaskExtensionAzureStorageConfig.GetDefaultDurableTaskOptions">
+            <inheritdoc/>
+        </member>
+        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableTaskExtensionAzureStorageConfig.Microsoft#Azure#WebJobs#Host#Config#IExtensionConfigProvider#Initialize(Microsoft.Azure.WebJobs.Host.Config.ExtensionConfigContext)">
+            <summary>
+            Internal initialization call from the WebJobs host.
+            </summary>
+            <param name="context">Extension context provided by WebJobs.</param>
+        </member>
+    </members>
+</doc>

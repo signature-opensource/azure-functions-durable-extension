@@ -1,0 +1,29 @@
+﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed under the MIT License. See LICENSE in the project root for license information.
+
+using DurableTask.Core;
+using DurableTask.Emulator;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask.Options;
+
+namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
+{
+    internal class EmulatorOrchestrationServiceFactory : IOrchestrationServiceFactory
+    {
+        private readonly LocalOrchestrationService service;
+
+        public EmulatorOrchestrationServiceFactory(DurableTaskEmulatorOptions options)
+        {
+            this.service = new LocalOrchestrationService();
+        }
+
+        public IOrchestrationServiceClient GetOrchestrationClient(OrchestrationClientAttribute attribute)
+        {
+            return (IOrchestrationServiceClient)this.service;
+        }
+
+        public IOrchestrationService GetOrchestrationService()
+        {
+            return (IOrchestrationService)this.service;
+        }
+    }
+}

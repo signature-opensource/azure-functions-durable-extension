@@ -35,7 +35,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
     /// <summary>
     /// Configuration for the Durable Functions extension.
     /// </summary>
-    public class DurableTaskExtensionBase :
+    public abstract class DurableTaskExtensionBase :
         IAsyncConverter<HttpRequestMessage, HttpResponseMessage>,
         INameVersionObjectManager<TaskOrchestration>,
         INameVersionObjectManager<TaskActivity>
@@ -76,13 +76,13 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
         public DurableTaskExtensionBase()
         {
             // Options initialization happens later
-            this.Options = new DurableTaskOptions();
+            this.Options = this.GetDefaultDurableTaskOptions();
             this.isOptionsConfigured = false;
         }
 #endif
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DurableTaskExtension"/>.
+        /// Initializes a new instance of the <see cref="DurableTaskExtensionBase"/>.
         /// </summary>
         /// <param name="options">The configuration options for this extension.</param>
         /// <param name="loggerFactory">The logger factory used for extension-specific logging and orchestration tracking.</param>
@@ -90,14 +90,23 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
         /// <param name="orchestrationServiceFactory">The factory used to create orchestration service based on the configured storage provider.</param>
         /// <param name="durableHttpMessageHandlerFactory">The HTTP message handler that handles HTTP requests and HTTP responses.</param>
         public DurableTaskExtensionBase(
-            IOptions<DurableTaskOptions> options,
+            DurableTaskOptions options,
             ILoggerFactory loggerFactory,
             INameResolver nameResolver,
             IOrchestrationServiceFactory orchestrationServiceFactory,
             IDurableHttpMessageHandlerFactory durableHttpMessageHandlerFactory = null)
         {
             // Options will be null in Functions v1 runtime - populated later.
-            this.Options = options?.Value ?? new DurableTaskOptions();
+            if (options == null)
+            {
+                options = this.GetDefaultDurableTaskOptions();
+            }
+            else
+            {
+                this.isOptionsConfigured = true;
+            }
+
+            this.Options = options;
             this.nameResolver = nameResolver ?? throw new ArgumentNullException(nameof(nameResolver));
 
             if (loggerFactory == null)
@@ -123,8 +132,17 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
         }
 
 #if !NETSTANDARD2_0
-        internal DurableTaskExtensionBase(
-            IOptions<DurableTaskOptions> options,
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DurableTaskExtensionBase"/>.
+        /// </summary>
+        /// <param name="options">The configuration options for this extension.</param>
+        /// <param name="loggerFactory">The logger factory used for extension-specific logging and orchestration tracking.</param>
+        /// <param name="nameResolver">The name resolver to use for looking up application settings.</param>
+        /// <param name="orchestrationServiceFactory">The factory used to create orchestration service based on the configured storage provider.</param>
+        /// <param name="connectionStringResolver">The object used to resolve/lookup connection strings.</param>
+        /// <param name="durableHttpMessageHandlerFactory">The HTTP message handler that handles HTTP requests and HTTP responses.</param>
+        public DurableTaskExtensionBase(
+            DurableTaskOptions options,
             ILoggerFactory loggerFactory,
             INameResolver nameResolver,
             IOrchestrationServiceFactory orchestrationServiceFactory,
@@ -158,6 +176,12 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
         internal ILifeCycleNotificationHelper LifeCycleNotificationHelper { get; private set; }
 
         internal EndToEndTraceHelper TraceHelper { get; private set; }
+
+        /// <summary>
+        /// Gets a nonpopulated DurableTaskOptions for Functions V1 runtime to populate.
+        /// </summary>
+        /// <returns>An empty DurableTaskOptions of the appropriate type.</returns>
+        public abstract DurableTaskOptions GetDefaultDurableTaskOptions();
 
         /// <summary>
         /// Internal initialization call from the WebJobs host.
@@ -230,7 +254,6 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
             this.TraceHelper = new EndToEndTraceHelper(logger, this.Options.Tracing.TraceReplayEvents);
             this.HttpApiHandler = new HttpApiHandler(this, logger);
             this.connectionStringResolver = new WebJobsConnectionStringProvider();
-            this.orchestrationServiceFactory = new OrchestrationServiceFactory(new OptionsWrapper<DurableTaskOptions>(this.Options), this.connectionStringResolver);
             this.nameResolver = context.Config.NameResolver;
             this.LifeCycleNotificationHelper = this.CreateLifeCycleNotificationHelper();
 #endif
@@ -609,7 +632,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
             }
             else if (args.Name.StartsWith("Microsoft.Azure.WebJobs.DurableTask"))
             {
-                return typeof(DurableTaskExtension).Assembly;
+                return typeof(DurableTaskExtensionBase).Assembly;
             }
 
             return null;

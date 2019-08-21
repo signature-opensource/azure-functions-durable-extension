@@ -220,7 +220,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
                 wrappedOptions,
                 new LoggerFactory(),
                 TestHelpers.GetTestNameResolver(),
-                new AzureStorageOrchestrationServiceFactory(options, connectionStringResolver),
+                new AzureStorageOrchestrationServiceFactory(wrappedOptions, connectionStringResolver),
                 new DurableHttpMessageHandlerFactory());
         }
     }

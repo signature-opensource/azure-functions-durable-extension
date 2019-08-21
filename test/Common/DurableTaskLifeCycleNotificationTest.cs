@@ -1232,7 +1232,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
                 wrappedOptions,
                 new LoggerFactory(),
                 mockNameResolver.Object,
-                new AzureStorageOrchestrationServiceFactory(options, connectionStringResolver));
+                new AzureStorageOrchestrationServiceFactory(wrappedOptions, connectionStringResolver));
 
             var eventGridLifeCycleNotification = (EventGridLifeCycleNotificationHelper)extension.LifeCycleNotificationHelper;
 
@@ -1264,7 +1264,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
                 wrappedOptions,
                 new LoggerFactory(),
                 new SimpleNameResolver(),
-                new AzureStorageOrchestrationServiceFactory(options, connectionStringResolver));
+                new AzureStorageOrchestrationServiceFactory(wrappedOptions, connectionStringResolver));
 
             var lifeCycleNotificationHelper = extension.LifeCycleNotificationHelper;
 
@@ -1287,7 +1287,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
                 wrappedOptions,
                 new LoggerFactory(),
                 new SimpleNameResolver(),
-                new AzureStorageOrchestrationServiceFactory(options, new TestConnectionStringResolver()));
+                new AzureStorageOrchestrationServiceFactory(wrappedOptions, new TestConnectionStringResolver()));
 
             var lifeCycleNotificationHelper = extension.LifeCycleNotificationHelper;
 
@@ -1318,7 +1318,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
                 wrappedOptions,
                 new LoggerFactory(),
                 new SimpleNameResolver(),
-                new AzureStorageOrchestrationServiceFactory(options, new TestConnectionStringResolver()));
+                new AzureStorageOrchestrationServiceFactory(wrappedOptions, new TestConnectionStringResolver()));
 
             var lifeCycleNotificationHelper = extension.LifeCycleNotificationHelper;
 

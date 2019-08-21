@@ -159,14 +159,18 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
             sb.Append(this.StorageOptions.StorageTypeName).Append(": { ");
             List<KeyValuePair<string, string>> storageProviderValues = this.StorageOptions.GetValues();
             int numStorageProviderValues = storageProviderValues.Count;
-            for (int i = 0; i < numStorageProviderValues - 1; i++)
+            if (numStorageProviderValues > 0)
             {
-                var currentValue = storageProviderValues[i];
-                sb.Append(currentValue.Key).Append(":").Append(currentValue.Value).Append(", ");
+                for (int i = 0; i < numStorageProviderValues - 1; i++)
+                {
+                    var currentValue = storageProviderValues[i];
+                    sb.Append(currentValue.Key).Append(":").Append(currentValue.Value).Append(", ");
+                }
+
+                var lastValue = storageProviderValues[numStorageProviderValues - 1];
+                sb.Append(lastValue.Key).Append(":").Append(lastValue.Value);
             }
 
-            var lastValue = storageProviderValues[numStorageProviderValues - 1];
-            sb.Append(lastValue.Key).Append(":").Append(lastValue.Value);
             sb.Append(" }, ");
         }
 

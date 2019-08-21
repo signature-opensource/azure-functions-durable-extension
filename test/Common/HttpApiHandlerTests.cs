@@ -1014,7 +1014,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
                     options,
                     new LoggerFactory(),
                     TestHelpers.GetTestNameResolver(),
-                    new AzureStorageOrchestrationServiceFactory(options, new TestConnectionStringResolver()),
+                    new AzureStorageOrchestrationServiceFactory(new OptionsWrapper<DurableTaskAzureStorageOptions>(options), new TestConnectionStringResolver()),
                     new DurableHttpMessageHandlerFactory())
             {
             }

@@ -5,6 +5,7 @@ using System;
 using DurableTask.AzureStorage;
 using DurableTask.Core;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask.Options;
+using Microsoft.Extensions.Options;
 
 namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Azure
 {
@@ -16,12 +17,12 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Azure
         private AzureStorageOrchestrationService defaultService;
 
         public AzureStorageOrchestrationServiceFactory(
-            DurableTaskAzureStorageOptions options,
+            IOptions<DurableTaskAzureStorageOptions> options,
             IConnectionStringResolver connectionStringResolver)
         {
-            this.options = options;
+            this.options = options.Value;
             this.connectionStringResolver = connectionStringResolver;
-            this.defaultSettings = this.GetAzureStorageOrchestrationServiceSettings(options);
+            this.defaultSettings = this.GetAzureStorageOrchestrationServiceSettings(this.options);
         }
 
         public IOrchestrationService GetOrchestrationService()

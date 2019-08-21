@@ -4,6 +4,7 @@
 using DurableTask.Core;
 using DurableTask.Emulator;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask.Options;
+using Microsoft.Extensions.Options;
 
 namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
 {
@@ -11,7 +12,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
     {
         private readonly LocalOrchestrationService service;
 
-        public EmulatorOrchestrationServiceFactory(DurableTaskEmulatorOptions options)
+        public EmulatorOrchestrationServiceFactory(IOptions<DurableTaskEmulatorOptions> options)
         {
             this.service = new LocalOrchestrationService();
         }

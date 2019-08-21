@@ -32,6 +32,10 @@
   <ItemGroup>
     <Compile Include="..\Common\*.cs" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="..\Common\DurableOptionsConfigurationTests.cs" />
+  </ItemGroup>
   
   <ItemGroup>
     <ProjectReference Include="..\..\src\WebJobs.Extensions.DurableTask.AzureStorage\WebJobs.Extensions.DurableTask.AzureStorage.csproj" />

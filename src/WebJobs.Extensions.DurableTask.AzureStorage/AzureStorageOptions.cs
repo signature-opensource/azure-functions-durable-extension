@@ -158,7 +158,6 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Options
                 new KeyValuePair<string, string>(nameof(this.ControlQueueBatchSize), this.ControlQueueBatchSize.ToString()),
                 new KeyValuePair<string, string>(nameof(this.ControlQueueVisibilityTimeout), this.ControlQueueVisibilityTimeout.ToString()),
                 new KeyValuePair<string, string>(nameof(this.WorkItemQueueVisibilityTimeout), this.WorkItemQueueVisibilityTimeout.ToString()),
-                new KeyValuePair<string, string>(nameof(this.TrackingStoreConnectionStringName), this.TrackingStoreConnectionStringName.ToString()),
                 new KeyValuePair<string, string>(nameof(this.FetchLargeMessagesAutomatically), this.FetchLargeMessagesAutomatically.ToString()),
                 new KeyValuePair<string, string>(nameof(this.MaxQueuePollingInterval), this.MaxQueuePollingInterval.ToString()),
             };

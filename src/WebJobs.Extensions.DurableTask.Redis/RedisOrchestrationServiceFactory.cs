@@ -4,6 +4,7 @@
 using DurableTask.Core;
 using DurableTask.Redis;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask.Options;
+using Microsoft.Extensions.Options;
 
 namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
 {
@@ -13,10 +14,10 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
         private readonly string redisConnectionString;
         private readonly string defaultHubName;
 
-        public RedisOrchestrationServiceFactory(DurableTaskRedisOptions options, IConnectionStringResolver connectionStringResolver)
+        public RedisOrchestrationServiceFactory(IOptions<DurableTaskRedisOptions> options, IConnectionStringResolver connectionStringResolver)
         {
-            this.redisConnectionString = connectionStringResolver.Resolve(options.RedisStorageProvider.ConnectionStringName);
-            this.defaultHubName = options.HubName;
+            this.redisConnectionString = connectionStringResolver.Resolve(options.Value.RedisStorageProvider.ConnectionStringName);
+            this.defaultHubName = options.Value.HubName;
             this.defaultTaskHubService = new RedisOrchestrationService(new RedisOrchestrationServiceSettings()
             {
                 TaskHubName = this.defaultHubName,

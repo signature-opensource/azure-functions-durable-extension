@@ -61,33 +61,29 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
             {
                 case DurableTaskAzureStorageOptions azureOptions:
                     {
-                        var connectionResolver = new WebJobsConnectionStringProvider();
-                        var orchestrationServiceFactory = new AzureStorageOrchestrationServiceFactory(azureOptions, connectionResolver);
-
                         var wrappedOptions = new OptionsWrapper<DurableTaskAzureStorageOptions>(azureOptions);
+                        var connectionResolver = new WebJobsConnectionStringProvider();
+                        var orchestrationServiceFactory = new AzureStorageOrchestrationServiceFactory(wrappedOptions, connectionResolver);
                         var extension = new DurableTaskExtensionAzureStorageConfig(wrappedOptions, loggerFactory, nameResolver, orchestrationServiceFactory, durableHttpMessageHandler);
-
                         config.Use(extension);
                     }
 
                     break;
                 case DurableTaskRedisOptions redisOptions:
                     {
-                        var connectionResolver = new WebJobsConnectionStringProvider();
-                        var orchestrationServiceFactory = new RedisOrchestrationServiceFactory(redisOptions, connectionResolver);
                         var wrappedOptions = new OptionsWrapper<DurableTaskRedisOptions>(redisOptions);
+                        var connectionResolver = new WebJobsConnectionStringProvider();
+                        var orchestrationServiceFactory = new RedisOrchestrationServiceFactory(wrappedOptions, connectionResolver);
                         var extension = new DurableTaskExtensionRedisConfig(wrappedOptions, loggerFactory, nameResolver, orchestrationServiceFactory, durableHttpMessageHandler);
-
                         config.Use(extension);
                     }
 
                     break;
                 case DurableTaskEmulatorOptions emulatorOptions:
                     {
-                        var orchestrationServiceFactory = new EmulatorOrchestrationServiceFactory(emulatorOptions);
                         var wrappedOptions = new OptionsWrapper<DurableTaskEmulatorOptions>(emulatorOptions);
+                        var orchestrationServiceFactory = new EmulatorOrchestrationServiceFactory(wrappedOptions);
                         var extension = new DurableTaskExtensionEmulatorConfig(wrappedOptions, loggerFactory, nameResolver, orchestrationServiceFactory, durableHttpMessageHandler);
-
                         config.Use(extension);
                     }
 

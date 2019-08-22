@@ -4,8 +4,11 @@
 using System;
 using System.Collections.Concurrent;
 using System.Net.Http;
+using System.Reflection;
+using DurableTask.AzureStorage;
 using DurableTask.Core;
 using Microsoft.Azure.WebJobs.Description;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask.Azure;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask.Options;
 using Microsoft.Azure.WebJobs.Host.Config;
 using Microsoft.Azure.WebJobs.Logging;
@@ -57,9 +60,34 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
 #endif
 
         /// <inheritdoc/>
+        public override void ConfigureLoaderHooks()
+        {
+#if !NETSTANDARD2_0
+            AppDomain.CurrentDomain.AssemblyResolve += ResolveAssembly;
+#endif
+            base.ConfigureLoaderHooks();
+        }
+
+        private static Assembly ResolveAssembly(object sender, ResolveEventArgs args)
+        {
+            if (args.Name.StartsWith("DurableTask.AzureStorage"))
+            {
+                return typeof(AzureStorageOrchestrationService).Assembly;
+            }
+
+            return null;
+        }
+
+        /// <inheritdoc/>
         public override DurableTaskOptions GetDefaultDurableTaskOptions()
         {
             return new DurableTaskAzureStorageOptions();
+        }
+
+        /// <inheritdoc/>
+        public override IDurableSpecialOperationsClient GetSpecialtyClient(TaskHubClient client)
+        {
+            return new DurableAzureStorageSpecialOperationsClient(client);
         }
 
         /// <summary>

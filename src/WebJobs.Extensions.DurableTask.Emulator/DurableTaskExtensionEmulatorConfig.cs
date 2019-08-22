@@ -1,11 +1,13 @@
 ﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using DurableTask.Core;
 using Microsoft.Azure.WebJobs.Description;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask.Options;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask.ContextImplementations;
 using Microsoft.Azure.WebJobs.Host.Config;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.Azure.WebJobs.Extensions.DurableTask.Options;
 
 namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
 {
@@ -34,6 +36,12 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
         public override DurableTaskOptions GetDefaultDurableTaskOptions()
         {
             return new DurableTaskEmulatorOptions();
+        }
+
+        /// <inheritdoc />
+        public override IDurableSpecialOperationsClient GetSpecialtyClient(TaskHubClient client)
+        {
+            return new DefaultDurableSpecialOperationsClient("Emulator");
         }
 
         void IExtensionConfigProvider.Initialize(ExtensionConfigContext context)

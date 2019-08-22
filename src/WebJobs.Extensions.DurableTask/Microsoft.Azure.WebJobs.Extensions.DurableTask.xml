@@ -4,6 +4,45 @@
         <name>Microsoft.Azure.WebJobs.Extensions.DurableTask</name>
     </assembly>
     <members>
+        <member name="T:Microsoft.Azure.WebJobs.Extensions.DurableTask.ContextImplementations.DefaultDurableSpecialOperationsClient">
+            <summary>
+            An implementation of <see cref="T:Microsoft.Azure.WebJobs.Extensions.DurableTask.IDurableSpecialOperationsClient"/> that throws user-friendly
+            <see cref="T:System.NotImplementedException"/> messages by default. Storage providers that don't implement all of
+            the special operations can use this, or extend this class and override the methods that can be
+            implemented with that storage provider.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.ContextImplementations.DefaultDurableSpecialOperationsClient.#ctor(System.String)">
+            <summary>
+            Creates an instance of the special operations client, with a storage provider name specified
+            to make the exceptions thrown more clear.
+            </summary>
+            <param name="storageProviderName">Storage provider name to reference in <see cref="T:System.NotImplementedException"/> error messages.</param>
+        </member>
+        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.ContextImplementations.DefaultDurableSpecialOperationsClient.GetAllOrchestrationStates(System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.ContextImplementations.DefaultDurableSpecialOperationsClient.GetAllOrchestrationStatesWithFilters(System.DateTime,System.Nullable{System.DateTime},System.Collections.Generic.IEnumerable{Microsoft.Azure.WebJobs.OrchestrationRuntimeStatus},System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.ContextImplementations.DefaultDurableSpecialOperationsClient.GetOrchestrationStateAsync(System.String,System.Boolean,System.Boolean)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.ContextImplementations.DefaultDurableSpecialOperationsClient.GetOrchestrationStateWithPagination(Microsoft.Azure.WebJobs.Extensions.DurableTask.OrchestrationStatusQueryCondition,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.ContextImplementations.DefaultDurableSpecialOperationsClient.PurgeHistoryByFilters(System.DateTime,System.Nullable{System.DateTime},System.Collections.Generic.IEnumerable{DurableTask.Core.OrchestrationStatus})">
+            <inheritdoc/>
+        </member>
+        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.ContextImplementations.DefaultDurableSpecialOperationsClient.PurgeInstanceHistoryByInstanceId(System.String)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.ContextImplementations.DefaultDurableSpecialOperationsClient.RetrieveSerializedEntityState(System.String)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.ContextImplementations.DefaultDurableSpecialOperationsClient.RewindAsync(System.String,System.String)">
+            <inheritdoc/>
+        </member>
         <member name="T:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableActivityContext">
             <summary>
             The default parameter type for activity functions.
@@ -127,6 +166,9 @@
         <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableOrchestrationClient.Microsoft#Azure#WebJobs#IDurableOrchestrationClient#GetStatusAsync(System.DateTime,System.Nullable{System.DateTime},System.Collections.Generic.IEnumerable{Microsoft.Azure.WebJobs.OrchestrationRuntimeStatus},System.Threading.CancellationToken)">
             <inheritdoc />
         </member>
+        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableOrchestrationClient.Microsoft#Azure#WebJobs#IDurableOrchestrationClient#ReadEntityStateAsync``1(Microsoft.Azure.WebJobs.EntityId,System.String,System.String)">
+            <inheritdoc />
+        </member>
         <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableOrchestrationClient.Microsoft#Azure#WebJobs#IDurableOrchestrationClient#PurgeInstanceHistoryAsync(System.String)">
             <inheritdoc />
         </member>
@@ -207,6 +249,76 @@
         </member>
         <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableOrchestrationContext.Microsoft#Azure#WebJobs#IInterleavingContext#LockAsync(Microsoft.Azure.WebJobs.EntityId[])">
             <inheritdoc/>
+        </member>
+        <member name="T:Microsoft.Azure.WebJobs.Extensions.DurableTask.IDurableSpecialOperationsClient">
+            <summary>
+            An interface for methods that are not required to be implemented by standard Durable Task storage providers.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.IDurableSpecialOperationsClient.RewindAsync(System.String,System.String)">
+            <summary>
+            Rewinds the specified failed orchestration instance with a reason.
+            </summary>
+            <param name="instanceId">The ID of the orchestration instance to rewind.</param>
+            <param name="reason">The reason for rewinding the orchestration instance.</param>
+            <returns>A task that completes when the rewind message is enqueued.</returns>
+        </member>
+        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.IDurableSpecialOperationsClient.GetOrchestrationStateAsync(System.String,System.Boolean,System.Boolean)">
+            <summary>
+            Gets the state of the specified orchestration instance.
+            </summary>
+            <param name="instanceId">The ID of the orchestration instance to query.</param>
+            <param name="showHistory">Boolean marker for including execution history in the response.</param>
+            <param name="showInput">If set, fetch and return the input for the orchestration instance.</param>
+            <returns>Returns a task which completes when the state has been fetched.</returns>
+        </member>
+        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.IDurableSpecialOperationsClient.GetAllOrchestrationStates(System.Threading.CancellationToken)">
+            <summary>
+            Gets the status of all orchestration instances.
+            </summary>
+            <param name="cancellationToken">A token to cancel the request.</param>
+            <returns>Returns a task which completes when the status has been fetched.</returns>
+        </member>
+        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.IDurableSpecialOperationsClient.GetAllOrchestrationStatesWithFilters(System.DateTime,System.Nullable{System.DateTime},System.Collections.Generic.IEnumerable{Microsoft.Azure.WebJobs.OrchestrationRuntimeStatus},System.Threading.CancellationToken)">
+            <summary>
+            Gets the status of all orchestration instances within the specified parameters.
+            </summary>
+            <param name="createdTimeFrom">Return orchestration instances which were created after this DateTime.</param>
+            <param name="createdTimeTo">Return orchestration instances which were created before this DateTime.</param>
+            <param name="runtimeStatus">Return orchestration instances which matches the runtimeStatus.</param>
+            <param name="cancellationToken">A token to cancel the request.</param>
+            <returns>Returns a task which completes when the status has been fetched.</returns>
+        </member>
+        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.IDurableSpecialOperationsClient.RetrieveSerializedEntityState(System.String)">
+            <summary>
+            Retrieves the state for a serialized entity.
+            </summary>
+            <param name="inputState">In memory representation of state.</param>
+            <returns>Serialized state for the entity.</returns>
+        </member>
+        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.IDurableSpecialOperationsClient.PurgeInstanceHistoryByInstanceId(System.String)">
+            <summary>
+            Purges the instance history for the provided instance id.
+            </summary>
+            <param name="instanceId">The instance id for the instance history to purge.</param>
+            <returns>The number of instances purged.</returns>
+        </member>
+        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.IDurableSpecialOperationsClient.PurgeHistoryByFilters(System.DateTime,System.Nullable{System.DateTime},System.Collections.Generic.IEnumerable{DurableTask.Core.OrchestrationStatus})">
+            <summary>
+            Purges history that meet the required parameters.
+            </summary>
+            <param name="createdTimeFrom">Purge the history of orchestration instances which were created after this DateTime.</param>
+            <param name="createdTimeTo">Purge the history of orchestration instances which were created before this DateTime.</param>
+            <param name="runtimeStatus">Purge the history of orchestration instances which matches the runtimeStatus.</param>
+            <returns>The number of instances purged.</returns>
+        </member>
+        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.IDurableSpecialOperationsClient.GetOrchestrationStateWithPagination(Microsoft.Azure.WebJobs.Extensions.DurableTask.OrchestrationStatusQueryCondition,System.Threading.CancellationToken)">
+            <summary>
+            Gets paginated result of all orchestration instances that match query status parameters.
+            </summary>
+            <param name="condition">The filtering conditions of the query.</param>
+            <param name="cancellationToken">A token to cancel the request.</param>
+            <returns>Paginated result of orchestration state.</returns>
         </member>
         <member name="T:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableHttpRequest">
             <summary>
@@ -390,6 +502,20 @@
             <param name="name">The name of the activity to return.</param>
             <param name="version">Not used.</param>
             <returns>An activity shim that delegates execution to an activity function.</returns>
+        </member>
+        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableTaskExtensionBase.ConfigureLoaderHooks">
+            <summary>
+            Azure Functions V1 uses this for assembly loading help.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableTaskExtensionBase.GetSpecialtyClient(DurableTask.Core.TaskHubClient)">
+            <summary>
+            Storage providers must provide a way to get specialty client for operations not on
+            <see cref="T:DurableTask.Core.IOrchestrationService"/>. Storage providers that don't support this functionality
+            can reference <see cref="T:Microsoft.Azure.WebJobs.Extensions.DurableTask.ContextImplementations.DefaultDurableSpecialOperationsClient"/>.
+            </summary>
+            <param name="client">Task hub client used by specialty client.</param>
+            <returns>Client to use special operations.</returns>
         </member>
         <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableTaskExtensionBase.GetClient(Microsoft.Azure.WebJobs.OrchestrationClientAttribute)">
             <summary>

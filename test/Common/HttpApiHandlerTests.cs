@@ -12,6 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using DurableTask.Core;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask.Azure;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask.ContextImplementations;
 #if NETSTANDARD2_0
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -1022,6 +1023,11 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
             public override DurableTaskOptions GetDefaultDurableTaskOptions()
             {
                 return new DurableTaskAzureStorageOptions();
+            }
+
+            public override IDurableSpecialOperationsClient GetSpecialtyClient(TaskHubClient client)
+            {
+                return new DefaultDurableSpecialOperationsClient("mock");
             }
 
             protected internal override IDurableOrchestrationClient GetClient(OrchestrationClientAttribute attribute)

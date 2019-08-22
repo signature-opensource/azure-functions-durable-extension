@@ -15,6 +15,9 @@
         <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableTaskExtensionRedisConfig.GetDefaultDurableTaskOptions">
             <inheritdoc />
         </member>
+        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableTaskExtensionRedisConfig.GetSpecialtyClient(DurableTask.Core.TaskHubClient)">
+            <inheritdoc />
+        </member>
         <member name="T:Microsoft.Azure.WebJobs.Extensions.DurableTask.Options.DurableTaskRedisOptions">
             <summary>
             Durable Task options for the Redis flavored Durable Task extension.

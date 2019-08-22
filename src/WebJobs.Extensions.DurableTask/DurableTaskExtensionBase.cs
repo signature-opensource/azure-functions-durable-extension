@@ -3,22 +3,18 @@
 
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
-using System.Runtime.ExceptionServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using DurableTask.AzureStorage;
 using DurableTask.Core;
 using DurableTask.Core.Common;
 using DurableTask.Core.Exceptions;
 using DurableTask.Core.History;
 using DurableTask.Core.Middleware;
-using Microsoft.AspNetCore.Routing.Template;
-using Microsoft.Azure.WebJobs.Description;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask.ContextImplementations;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask.Listener;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask.Options;
 using Microsoft.Azure.WebJobs.Host;
@@ -189,7 +185,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
         /// <param name="context">Extension context provided by WebJobs.</param>
         protected void Initialize(ExtensionConfigContext context)
         {
-            ConfigureLoaderHooks();
+            this.ConfigureLoaderHooks();
 
             // Functions V1 has it's configuration initialized at startup time (now).
             // For Functions V2 (and for some unit tests) configuration happens earlier in the pipeline.
@@ -612,8 +608,10 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
             return info;
         }
 
-        // This is temporary until script loading
-        private static void ConfigureLoaderHooks()
+        /// <summary>
+        /// Azure Functions V1 uses this for assembly loading help.
+        /// </summary>
+        public virtual void ConfigureLoaderHooks()
         {
 #if !NETSTANDARD2_0
             AppDomain.CurrentDomain.AssemblyResolve += ResolveAssembly;
@@ -626,10 +624,6 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
             {
                 return typeof(TaskOrchestration).Assembly;
             }
-            else if (args.Name.StartsWith("DurableTask.AzureStorage"))
-            {
-                return typeof(AzureStorageOrchestrationService).Assembly;
-            }
             else if (args.Name.StartsWith("Microsoft.Azure.WebJobs.DurableTask"))
             {
                 return typeof(DurableTaskExtensionBase).Assembly;
@@ -637,6 +631,15 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
 
             return null;
         }
+
+        /// <summary>
+        /// Storage providers must provide a way to get specialty client for operations not on
+        /// <see cref="IOrchestrationService"/>. Storage providers that don't support this functionality
+        /// can reference <see cref="DefaultDurableSpecialOperationsClient"/>.
+        /// </summary>
+        /// <param name="client">Task hub client used by specialty client.</param>
+        /// <returns>Client to use special operations.</returns>
+        public abstract IDurableSpecialOperationsClient GetSpecialtyClient(TaskHubClient client);
 
         /// <summary>
         /// Gets a <see cref="DurableOrchestrationClient"/> using configuration from a <see cref="OrchestrationClientAttribute"/> instance.

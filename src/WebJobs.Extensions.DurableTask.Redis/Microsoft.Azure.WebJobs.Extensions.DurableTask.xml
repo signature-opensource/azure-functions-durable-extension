@@ -65,12 +65,20 @@
             Extension for registering a Durable Functions configuration with <c>JobHostConfiguration</c>.
             </summary>
         </member>
-        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.RedisDurableTaskJobHostConfigurationExtensions.Use(Microsoft.Azure.WebJobs.JobHostConfiguration,Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableTaskExtensionRedisConfig)">
+        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.RedisDurableTaskJobHostConfigurationExtensions.AddRedisDurableTask(Microsoft.Azure.WebJobs.IWebJobsBuilder)">
             <summary>
-            Enable running durable orchestrations implemented as functions.
+            Adds the Azure STorage Durable Task extension to the provided <see cref="T:Microsoft.Azure.WebJobs.IWebJobsBuilder"/>.
             </summary>
-            <param name="hostConfig">Configuration settings of the current <c>JobHost</c> instance.</param>
-            <param name="listenerConfig">Durable Functions configuration.</param>
+            <param name="builder">The <see cref="T:Microsoft.Azure.WebJobs.IWebJobsBuilder"/> to configure.</param>
+            <returns>Returns the provided <see cref="T:Microsoft.Azure.WebJobs.IWebJobsBuilder"/>.</returns>
+        </member>
+        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.RedisDurableTaskJobHostConfigurationExtensions.AddRedisDurableTask(Microsoft.Azure.WebJobs.IWebJobsBuilder,Microsoft.Extensions.Options.IOptions{Microsoft.Azure.WebJobs.Extensions.DurableTask.Options.DurableTaskRedisOptions})">
+            <summary>
+            Adds the Durable Task extension to the provided <see cref="T:Microsoft.Azure.WebJobs.IWebJobsBuilder"/>.
+            </summary>
+            <param name="builder">The <see cref="T:Microsoft.Azure.WebJobs.IWebJobsBuilder"/> to configure.</param>
+            <param name="options">The configuration options for this extension.</param>
+            <returns>Returns the provided <see cref="T:Microsoft.Azure.WebJobs.IWebJobsBuilder"/>.</returns>
         </member>
     </members>
 </doc>

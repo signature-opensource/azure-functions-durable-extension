@@ -12,7 +12,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
     /// <summary>
     /// An interface for methods that are not required to be implemented by standard Durable Task storage providers.
     /// </summary>
-    public interface IDurableSpecialOperationsClient
+    internal interface IDurableSpecialOperationsClient
     {
         /// <summary>
         /// Rewinds the specified failed orchestration instance with a reason.

@@ -31,7 +31,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
     /// <summary>
     /// Configuration for the Durable Functions extension.
     /// </summary>
-    public abstract class DurableTaskExtensionBase :
+    internal abstract class DurableTaskExtensionBase :
         IAsyncConverter<HttpRequestMessage, HttpResponseMessage>,
         INameVersionObjectManager<TaskOrchestration>,
         INameVersionObjectManager<TaskActivity>
@@ -611,7 +611,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
         /// <summary>
         /// Azure Functions V1 uses this for assembly loading help.
         /// </summary>
-        public virtual void ConfigureLoaderHooks()
+        internal virtual void ConfigureLoaderHooks()
         {
 #if !NETSTANDARD2_0
             AppDomain.CurrentDomain.AssemblyResolve += ResolveAssembly;
@@ -639,7 +639,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
         /// </summary>
         /// <param name="client">Task hub client used by specialty client.</param>
         /// <returns>Client to use special operations.</returns>
-        public abstract IDurableSpecialOperationsClient GetSpecialtyClient(TaskHubClient client);
+        internal abstract IDurableSpecialOperationsClient GetSpecialtyClient(TaskHubClient client);
 
         /// <summary>
         /// Gets a <see cref="DurableOrchestrationClient"/> using configuration from a <see cref="OrchestrationClientAttribute"/> instance.

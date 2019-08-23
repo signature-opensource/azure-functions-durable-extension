@@ -20,7 +20,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
     /// <summary>
     /// Client for starting, querying, terminating, and raising events to orchestration instances.
     /// </summary>
-    public class DurableOrchestrationClient : IDurableOrchestrationClient,
+    internal class DurableOrchestrationClient : IDurableOrchestrationClient,
 #pragma warning disable 618
         DurableOrchestrationClientBase // for v1 legacy compatibility.
 #pragma warning restore 618
@@ -549,7 +549,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
                 status.OrchestrationStatus == OrchestrationStatus.ContinuedAsNew;
         }
 
-        public static DurableOrchestrationStatus ConvertFrom(OrchestrationState orchestrationState, JArray historyArray = null)
+        internal static DurableOrchestrationStatus ConvertFrom(OrchestrationState orchestrationState, JArray historyArray = null)
         {
             return new DurableOrchestrationStatus
             {

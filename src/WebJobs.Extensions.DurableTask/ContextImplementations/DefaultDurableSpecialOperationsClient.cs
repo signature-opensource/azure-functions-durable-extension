@@ -15,7 +15,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.ContextImplementations
     /// the special operations can use this, or extend this class and override the methods that can be
     /// implemented with that storage provider.
     /// </summary>
-    public class DefaultDurableSpecialOperationsClient : IDurableSpecialOperationsClient
+    internal class DefaultDurableSpecialOperationsClient : IDurableSpecialOperationsClient
     {
         private readonly string storageProviderName;
 

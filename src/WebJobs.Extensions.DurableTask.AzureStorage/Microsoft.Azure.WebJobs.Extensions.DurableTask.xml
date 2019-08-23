@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <doc>
     <assembly>
-        <name>Microsoft.Azure.WebJobs.Extensions.DurableTask.Azure</name>
+        <name>Microsoft.Azure.WebJobs.Extensions.DurableTask.AzureStorage</name>
     </assembly>
     <members>
         <member name="T:Microsoft.Azure.WebJobs.Extensions.DurableTask.AzureStorageDurableTaskJobHostConfigurationExtensions">
@@ -9,20 +9,12 @@
             Extension for registering a Durable Functions configuration with <c>JobHostConfiguration</c>.
             </summary>
         </member>
-        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.AzureStorageDurableTaskJobHostConfigurationExtensions.AddAzureStorageDurableTask(Microsoft.Azure.WebJobs.IWebJobsBuilder)">
+        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.AzureStorageDurableTaskJobHostConfigurationExtensions.Use(Microsoft.Azure.WebJobs.JobHostConfiguration,Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableTaskExtensionAzureStorageConfig)">
             <summary>
-            Adds the Azure STorage Durable Task extension to the provided <see cref="T:Microsoft.Azure.WebJobs.IWebJobsBuilder"/>.
+            Enable running durable orchestrations implemented as functions.
             </summary>
-            <param name="builder">The <see cref="T:Microsoft.Azure.WebJobs.IWebJobsBuilder"/> to configure.</param>
-            <returns>Returns the provided <see cref="T:Microsoft.Azure.WebJobs.IWebJobsBuilder"/>.</returns>
-        </member>
-        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.AzureStorageDurableTaskJobHostConfigurationExtensions.AddAzureStorageDurableTask(Microsoft.Azure.WebJobs.IWebJobsBuilder,Microsoft.Extensions.Options.IOptions{Microsoft.Azure.WebJobs.Extensions.DurableTask.Options.DurableTaskAzureStorageOptions})">
-            <summary>
-            Adds the Durable Task extension to the provided <see cref="T:Microsoft.Azure.WebJobs.IWebJobsBuilder"/>.
-            </summary>
-            <param name="builder">The <see cref="T:Microsoft.Azure.WebJobs.IWebJobsBuilder"/> to configure.</param>
-            <param name="options">The configuration options for this extension.</param>
-            <returns>Returns the provided <see cref="T:Microsoft.Azure.WebJobs.IWebJobsBuilder"/>.</returns>
+            <param name="hostConfig">Configuration settings of the current <c>JobHost</c> instance.</param>
+            <param name="listenerConfig">Durable Functions configuration.</param>
         </member>
         <member name="T:Microsoft.Azure.WebJobs.Extensions.DurableTask.Options.AzureStorageOptions">
             <summary>

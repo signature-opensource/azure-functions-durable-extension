@@ -60,7 +60,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
 #endif
 
         /// <inheritdoc/>
-        public override void ConfigureLoaderHooks()
+        internal override void ConfigureLoaderHooks()
         {
 #if !NETSTANDARD2_0
             AppDomain.CurrentDomain.AssemblyResolve += ResolveAssembly;
@@ -79,13 +79,13 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
         }
 
         /// <inheritdoc/>
-        public override DurableTaskOptions GetDefaultDurableTaskOptions()
+        internal override DurableTaskOptions GetDefaultDurableTaskOptions()
         {
             return new DurableTaskAzureStorageOptions();
         }
 
         /// <inheritdoc/>
-        public override IDurableSpecialOperationsClient GetSpecialtyClient(TaskHubClient client)
+        internal override IDurableSpecialOperationsClient GetSpecialtyClient(TaskHubClient client)
         {
             return new DurableAzureStorageSpecialOperationsClient(client);
         }

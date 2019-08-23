@@ -178,14 +178,6 @@
         <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableOrchestrationClient.Microsoft#Azure#WebJobs#IDurableOrchestrationClient#GetStatusAsync(Microsoft.Azure.WebJobs.Extensions.DurableTask.OrchestrationStatusQueryCondition,System.Threading.CancellationToken)">
             <inheritdoc />
         </member>
-        <member name="M:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableOrchestrationClient.ConvertFrom(DurableTask.Core.OrchestrationState,Newtonsoft.Json.Linq.JArray)">
-            <summary>
-            dummy text.
-            </summary>
-            <param name="orchestrationState">Dummy text.</param>
-            <param name="historyArray">Dummy text 2.</param>
-            <returns>Dummy text 3.</returns>
-        </member>
         <member name="T:Microsoft.Azure.WebJobs.Extensions.DurableTask.DurableOrchestrationContext">
             <summary>
             Parameter data for orchestration bindings that can be used to schedule function-based activities.

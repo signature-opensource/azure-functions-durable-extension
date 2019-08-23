@@ -1020,12 +1020,12 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask.Tests
             {
             }
 
-            public override DurableTaskOptions GetDefaultDurableTaskOptions()
+            internal override DurableTaskOptions GetDefaultDurableTaskOptions()
             {
                 return new DurableTaskAzureStorageOptions();
             }
 
-            public override IDurableSpecialOperationsClient GetSpecialtyClient(TaskHubClient client)
+            internal override IDurableSpecialOperationsClient GetSpecialtyClient(TaskHubClient client)
             {
                 return new DefaultDurableSpecialOperationsClient("mock");
             }

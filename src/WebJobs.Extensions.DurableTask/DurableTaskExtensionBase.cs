@@ -31,7 +31,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
     /// <summary>
     /// Configuration for the Durable Functions extension.
     /// </summary>
-    internal abstract class DurableTaskExtensionBase :
+    public abstract class DurableTaskExtensionBase :
         IAsyncConverter<HttpRequestMessage, HttpResponseMessage>,
         INameVersionObjectManager<TaskOrchestration>,
         INameVersionObjectManager<TaskActivity>
@@ -177,7 +177,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
         /// Gets a nonpopulated DurableTaskOptions for Functions V1 runtime to populate.
         /// </summary>
         /// <returns>An empty DurableTaskOptions of the appropriate type.</returns>
-        public abstract DurableTaskOptions GetDefaultDurableTaskOptions();
+        internal abstract DurableTaskOptions GetDefaultDurableTaskOptions();
 
         /// <summary>
         /// Internal initialization call from the WebJobs host.

@@ -33,13 +33,13 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
         }
 
         /// <inheritdoc />
-        public override DurableTaskOptions GetDefaultDurableTaskOptions()
+        internal override DurableTaskOptions GetDefaultDurableTaskOptions()
         {
             return new DurableTaskEmulatorOptions();
         }
 
         /// <inheritdoc />
-        public override IDurableSpecialOperationsClient GetSpecialtyClient(TaskHubClient client)
+        internal override IDurableSpecialOperationsClient GetSpecialtyClient(TaskHubClient client)
         {
             return new DefaultDurableSpecialOperationsClient("Emulator");
         }

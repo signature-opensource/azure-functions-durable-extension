@@ -389,6 +389,22 @@ namespace Microsoft.Azure.WebJobs
                 timeout,
                 retryInterval: TimeSpan.FromSeconds(1));
         }
+
+        /// <summary>
+        /// Starts a new execution of the specified Logic Apps workflow.
+        /// </summary>
+        /// <param name="client">The client object.</param>
+        /// <param name="workflowName">The name of the Logic Apps workflow.</param>
+        /// <returns>A task that completes when the workflow is scheduled. The task contains the instance ID of the started workflow.</returns>
+        public static Task<string> StartLogicAppWorkflowAsync(
+            this IDurableOrchestrationClient client,
+            string workflowName)
+        {
+            return client.StartNewAsync(
+                orchestratorFunctionName: "LogicAppWF::" + workflowName,
+                instanceId: string.Empty,
+                input: null);
+        }
 #endif
 
         /// <summary>

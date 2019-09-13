@@ -1,0 +1,10 @@
+{
+    "bindings": [
+      {
+        "type": "orchestrationTrigger",
+        "name": "context",
+        "direction": "out"
+      }
+    ],
+    "disabled": false
+}

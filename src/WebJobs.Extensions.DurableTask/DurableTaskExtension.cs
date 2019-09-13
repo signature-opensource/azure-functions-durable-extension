@@ -303,6 +303,10 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
             {
                 return new TaskEntityShim(this, name);
             }
+            else if (name.StartsWith("LogicAppWF::"))
+            {
+                return new DurableLogicAppShim(this, name);
+            }
             else
             {
                 return new TaskOrchestrationShim(this, name);
@@ -326,7 +330,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
         /// <returns>An activity shim that delegates execution to an activity function.</returns>
         TaskActivity INameVersionObjectManager<TaskActivity>.GetObject(string name, string version)
         {
-            if (IsDurableHttpTask(name))
+            if (IsBuiltInFunction(name))
             {
                 return new TaskHttpActivityShim(this, this.durableHttpClient);
             }
@@ -747,7 +751,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
 
         internal void ThrowIfFunctionDoesNotExist(string name, FunctionType functionType)
         {
-            if (IsDurableHttpTask(name))
+            if (IsBuiltInFunction(name))
             {
                 return;
             }
@@ -764,9 +768,11 @@ namespace Microsoft.Azure.WebJobs.Extensions.DurableTask
             }
         }
 
-        private static bool IsDurableHttpTask(string functionName)
+        private static bool IsBuiltInFunction(string functionName)
         {
-            return string.Equals(functionName, HttpOptions.HttpTaskActivityReservedName);
+            return
+                string.Equals(functionName, HttpOptions.HttpTaskActivityReservedName) ||
+                functionName?.StartsWith("LogicAppWF::") == true;
         }
 
         internal string GetInvalidActivityFunctionMessage(string name)
